@@ -1,0 +1,28 @@
+{
+    "extends": "expo/tsconfig.base",
+    "compilerOptions": {
+      "skipLibCheck": true,
+      "strict": true,
+      "baseUrl": "./src",
+      "allowJs": true,
+      "target": "esnext",
+      "lib": ["es2017"],
+      "jsx": "react",
+      "module": "commonjs",
+      "moduleResolution": "node",
+      "resolveJsonModule": true,
+      "types": ["node"],
+      "typeRoots": ["node_modules/@types"]
+    },
+    "exclude": [
+      "node_modules",
+      "babel.config.js",
+      "metro.config.js",
+      "jest.config.js"
+    ],
+    "include": [
+      "src",
+      "src/global.d.ts" // Veya oluşturduğunuz diğer tanımlama dosyası
+    ],
+  }
+  
