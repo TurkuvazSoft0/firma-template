@@ -43,6 +43,7 @@ const Walkthrough03 = memo(() => {
       image: Images.walkthrough01,
       title: 'Uygulamamıza Hoş Geldiniz',
       describe: 'Uygulamamız çeşitli firmaları bünyesinde barındırmaktadır. İhtiyacınıza uygun teklifleri kolayca alabilirsiniz.',
+      width:200
     },
     {
       image: Images.walkthrough02,
@@ -68,10 +69,10 @@ const Walkthrough03 = memo(() => {
       ),
     };
   });
-
+  
   const _onStarted = () => {
-    dispatch(setAppIntro(true))
-    navigate('Onboarding');
+    dispatch(setAppIntro(false))
+    navigate('Login');
   };
 
   return (
@@ -106,7 +107,7 @@ const Walkthrough03 = memo(() => {
                   itemsCenter>
                   <Image
                     source={item.image}
-                    style={{width: width, height: width}}
+                    style={{width: width, height: width,objectFit:"contain"}}
                   />
                   <Animated.View style={styledAnimated}>
                     <Text

@@ -280,7 +280,7 @@ export const CountryPicker = ({
                   <Text
                     style={{color: '#246BFD', fontWeight: '700'}}
                     onPress={onRequestClose}>
-                    Close Modal
+                      Kapat
                   </Text>
                 )}
               </View>

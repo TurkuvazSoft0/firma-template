@@ -1,43 +1,80 @@
-import React from 'react';
-import {TouchableOpacity} from 'react-native';
-// ----------------------------- UI kitten -----------------------------------
+import React, { useState } from 'react';
+import { TouchableOpacity } from 'react-native';
+// ----------------------------- UI Kitten -----------------------------------
 import {
   StyleService,
   useStyleSheet,
   useTheme,
-  Avatar,
-  Icon,
-  Divider,
 } from '@ui-kitten/components';
 // ----------------------------- Components && Elements -----------------------
-import {AppIcon, CustomLayout, Text} from 'components';
+import { CustomLayout, Text } from 'components';
 // ----------------------------- @Types ---------------------------------------
-import EvaIcons from 'types/eva-icon-enum';
-import {IDoctorProps} from 'types/element-types';
+import GeneralModal from 'components/SearchScreens/Modals/GeneralModal';
+import { useLayout } from 'hooks';
 
-import {useLayout} from 'hooks';
-import {globalStyle} from 'styles/globalStyle';
-
-const DoctorItem = React.memo(({data}: {data: any}) => {
+const DoctorItem = React.memo(({ data, onOpen,searchValue,setMailList }: { data: any,setMailList:any, onOpen: any,searchValue:any }) => {
   const theme = useTheme();
-  const {width} = useLayout();
+  const { width } = useLayout();
   const styles = useStyleSheet(themedStyles);
-  
+  const [isModalVisible, setModalVisible] = React.useState(false);
+  const [selectedMail, setSelectedMail] = useState<any | null | object>(null);
+  const handlePress = () => {
+    // Email bilgisini state'e kaydediyoruz
+    setSelectedMail(data.sirket_veriler?.sirket_mail);
+    setMailList((prevMailList: string[]) => [...prevMailList, ...(data.sirket_veriler?.sirket_mail || [])]);
+    
+    setModalVisible(true);
+  };
+
+
+
+
   return (
-    <CustomLayout level="1" style={styles.container} horizontal gap={12}>
-      {/* @ts-ignore */}
-      <CustomLayout style={{flex: 1}}>
+    <CustomLayout
+      level="1"
+      onPress={onOpen}
+      style={[
+        styles.container,
+        // Eğer seçilen mail bu öğedeki mail ise yeşil renk, aksi takdirde normal renk
+ searchValue &&   selectedMail === data.sirket_veriler?.sirket_mail
+          ? { backgroundColor: theme['color-success-default'] } // Yeşil renk
+          : { backgroundColor: theme['background-basic-color-1'] }, // Normal renk
+      ]}
+      horizontal
+      gap={12}
+    >
+      <GeneralModal
+        setModalVisible={setModalVisible}
+        referanslar={data.sirketler_veriler?.referanslar}
+        visible={isModalVisible}
+        onClose={() => setModalVisible(false)}
+        phone={data.sirket_veriler?.sirket_telefon || []}
+        email={data.sirket_veriler?.sirket_mail || []}
+        web={data.sirket_veriler?.sirket_web || []}
+        location={data.sirket_veriler?.sirket_konum || []}
+        tags={data.sirket_veriler?.tags || []}
+        text={data.sirket_ad}
+        instegram={data.sirket_veriler?.instegram}
+        facebook={data.sirket_veriler?.facebook}
+        x={data.sirket_veriler?.x}
+        linkedin={data.sirket_veriler?.linkedin}
+        pinterest={data.sirket_veriler?.pinterest}
+      />
+
+      <CustomLayout style={{ flex: 1 }} onPress={handlePress}>
         <CustomLayout horizontal justify="space-between">
           <Text numberOfLines={1} maxWidth={300 * (width / 375)}>
             {data.sirket_ad}
           </Text>
         </CustomLayout>
-       
-        <CustomLayout horizontal itemsCenter gap={8} mb={8}>
-        </CustomLayout>
       </CustomLayout>
     </CustomLayout>
   );
+
+
+
+
+  
 });
 
 export default DoctorItem;
@@ -47,23 +84,5 @@ const themedStyles = StyleService.create({
     flex: 1,
     borderRadius: 16,
     padding: 16,
-    ...globalStyle.shadow,
-  },
-  divider: {
-    width: '100%',
-    height: 0.5,
-    backgroundColor: 'background-basic-color-7',
-    opacity: 0.5,
-    marginVertical: 12,
-  },
-  icon: {
-    width: 24,
-    height: 24,
-    tintColor: 'text-primary-color',
-  },
-  avatar: {
-    borderWidth: 1,
-    borderRadius: 99,
-    borderColor: 'text-primary-color',
   },
 });

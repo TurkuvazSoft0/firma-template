@@ -24,7 +24,7 @@ export const initialState: IAppState = {
   appLoading: false,
   alert: null,
   theme: ThemeMode.DARK,
-  intro: true,
+  intro: false,
   language: countryCodes[0],
 };
 
@@ -46,8 +46,8 @@ export const appSlice = createSlice({
       state.appLoading = payload;
     },
     setAppIntro: (state: IAppState, {payload}: PayloadAction<boolean>) => {
-      state.intro = payload;
-    },
+      state.intro = false;
+    }, 
     switchTheme: (state: IAppState) => {
       state.theme === ThemeMode.DARK
         ? (state.theme = ThemeMode.LIGHT)

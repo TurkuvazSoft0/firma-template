@@ -1,17 +1,18 @@
-import React, { memo, useEffect } from 'react';
+import React, { memo } from 'react';
 import { Alert, Image } from 'react-native';
 import { TopNavigation, Button, Input, StyleService, useStyleSheet } from '@ui-kitten/components';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { Text, CustomLayout as Layout, Container, NavigationAction } from 'components';
+import { Text, CustomLayout as Layout, Container, NavigationAction, CustomLayout, ButtonPickCountry } from 'components';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Formik } from 'formik';
+import * as Yup from 'yup';
 import { Images } from 'assets/images';
-import { AuthStackParamList } from 'types/navigation-types';
+import { AuthStackParamList, MainStackParamList } from 'types/navigation-types';
 import * as DocumentPicker from 'expo-document-picker';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from 'reduxs/store';
 import { firmaUserAdd } from 'reduxs/reducers/UserRegister';
-import { useStatusControl } from 'hooks/useStatus';
+import {CountryItem} from 'types/component-types';
 
 type FormikForm = {
   firmaName: string;
@@ -21,13 +22,22 @@ type FormikForm = {
   firmaMail: string;
   firmaPassword: string;
   firmaVergiLevhası: any;
+  country:CountryItem
 };
 
+// Form doğrulama şeması
+const validationSchema = Yup.object().shape({
+  firmaName: Yup.string().required('Firma adı zorunludur'),
+  firmaVergiDairesi: Yup.string().required('Vergi dairesi zorunludur'),
+  firmaVergiNumarasi: Yup.string().required('Vergi numarası zorunludur').matches(/^[0-9]+$/, 'Sadece sayılar girin'),
+  firmaTelefon: Yup.string().required('Telefon numarası zorunludur').matches(/^[0-9]+$/, 'Sadece sayılar girin'),
+  firmaMail: Yup.string().email('Geçerli bir e-posta adresi girin').required('E-posta adresi zorunludur'),
+  firmaPassword: Yup.string().required('Şifre zorunludur').min(6, 'Şifre en az 6 karakter olmalıdır'),
+});
 
 const SignUp = memo(() => {
-  const user_control = useStatusControl();
- 
-  const { navigate } = useNavigation<NavigationProp<AuthStackParamList>>();
+  const { navigate: authNavigate } = useNavigation<NavigationProp<AuthStackParamList>>();
+  const { goBack, navigate: mainNavigate } = useNavigation<NavigationProp<MainStackParamList>>();
   const styles = useStyleSheet(themedStyles);
   const dispatch = useDispatch<AppDispatch>();
 
@@ -38,15 +48,14 @@ const SignUp = memo(() => {
     firmaTelefon: '',
     firmaMail: '',
     firmaPassword: '',
+    country:_country,
     firmaVergiLevhası: null,
   };
 
-  // Dosya seçimi için DocumentPicker'ı kullanıyoruz
   const pickDocument = async (setFieldValue: any) => {
     try {
       let result = await DocumentPicker.getDocumentAsync({ type: 'application/pdf' });
       if (result?.type === 'success') {
-        // Seçilen dosya Formik'e ekleniyor
         setFieldValue('firmaVergiLevhası', result);
       }
     } catch (error) {
@@ -65,7 +74,6 @@ const SignUp = memo(() => {
       formData.append('password', values.firmaPassword);
       formData.append('firma_telefon', values.firmaTelefon);
 
-      // Dosya eklenmişse FormData'ya ekleyin
       if (values.firmaVergiLevhası) {
         formData.append('firma_vergilevhasi', {
           uri: values.firmaVergiLevhası.uri,
@@ -74,7 +82,6 @@ const SignUp = memo(() => {
         });
       }
 
-      // Redux ile formu gönderiyoruz
       dispatch(firmaUserAdd(formData));
     } catch (error) {
       console.error('Form gönderim hatası', error);
@@ -84,8 +91,9 @@ const SignUp = memo(() => {
   return (
     <Formik
       initialValues={initValues}
-      onSubmit={handleFormSubmit}>
-      {({ handleChange, handleBlur, handleSubmit, setFieldValue, values }) => (
+      onSubmit={handleFormSubmit}
+      validationSchema={validationSchema}>
+      {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
         <Container style={styles.container} level='1'>
           <TopNavigation style={styles.topNavigation} accessoryLeft={() => <NavigationAction />} />
           <KeyboardAwareScrollView enableOnAndroid extraHeight={40} showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
@@ -95,7 +103,6 @@ const SignUp = memo(() => {
                 Firma Kayıt
               </Text>
             </Layout>
-            {/* Firma Adı */}
             <Input
               label={'Firma Adı'}
               placeholder={'Firma adını girin'}
@@ -103,8 +110,9 @@ const SignUp = memo(() => {
               onChangeText={handleChange('firmaName')}
               onBlur={handleBlur('firmaName')}
               value={values.firmaName}
+              status={touched.firmaName && errors.firmaName ? 'danger' : 'basic'}
+              caption={touched.firmaName && errors.firmaName ? errors.firmaName : ''}
             />
-            {/* Vergi Dairesi */}
             <Input
               label={'Vergi Dairesi'}
               placeholder={'Vergi dairesini girin'}
@@ -112,8 +120,9 @@ const SignUp = memo(() => {
               onChangeText={handleChange('firmaVergiDairesi')}
               onBlur={handleBlur('firmaVergiDairesi')}
               value={values.firmaVergiDairesi}
+              status={touched.firmaVergiDairesi && errors.firmaVergiDairesi ? 'danger' : 'basic'}
+              caption={touched.firmaVergiDairesi && errors.firmaVergiDairesi ? errors.firmaVergiDairesi : ''}
             />
-            {/* Vergi Numarası */}
             <Input
               label={'Vergi Numarası'}
               placeholder={'Vergi numarasını girin'}
@@ -122,25 +131,46 @@ const SignUp = memo(() => {
               onChangeText={handleChange('firmaVergiNumarasi')}
               onBlur={handleBlur('firmaVergiNumarasi')}
               value={values.firmaVergiNumarasi}
+              maxLength={11}
+              status={touched.firmaVergiNumarasi && errors.firmaVergiNumarasi ? 'danger' : 'basic'}
+              caption={touched.firmaVergiNumarasi && errors.firmaVergiNumarasi ? errors.firmaVergiNumarasi : ''}
+              
             />
-            {/* Telefon Numarası */}
-            <Input
-              label={'Telefon Numarası'}
-              placeholder={'Telefon numarasını girin'}
-              keyboardType="phone-pad"
-              style={styles.input}
-              onChangeText={handleChange('firmaTelefon')}
-              onBlur={handleBlur('firmaTelefon')}
-              value={values.firmaTelefon}
-            />
-            {/* Vergi Levhası Yükleme */}
+
+<CustomLayout horizontal gap={8}>
+              <ButtonPickCountry
+                country={values.country}
+                onSave={e => setFieldValue('country', e)} 
+                style={{alignSelf:"center"}}
+              />
+              <Input
+                placeholder={'Telefon Numarası'}
+                onChangeText={handleChange('firmaTelefon')}
+                onBlur={handleBlur('firmaTelefon')}
+                value={values.firmaTelefon}
+                style={{width:"80%"}}
+                status={touched.firmaTelefon && errors.firmaTelefon ? 'danger' : 'basic'}
+                caption={touched.firmaTelefon && errors.firmaTelefon ? errors.firmaTelefon : ''}
+                // Telefon numarasına ülke kodunu ekliyoruz
+                accessoryLeft={({style}) => {
+                  return (
+                    values.country?.dial_code && (
+                      <CustomLayout horizontal itemsCenter gap={8}>
+                        <Text>{values.country.dial_code}</Text>
+                      </CustomLayout>
+                    )
+                  );
+                }}
+              />
+            </CustomLayout>
+
+          
             <Button
               style={styles.uploadButton}
               onPress={() => pickDocument(setFieldValue)}>
               Vergi Levhası Yükle
             </Button>
             {values.firmaVergiLevhası && <Text style={styles.uploadedFileName}>{values.firmaVergiLevhası.name}</Text>}
-            {/* E-posta */}
             <Input
               label={'E-posta Adresi'}
               placeholder={'E-posta adresinizi girin'}
@@ -148,9 +178,10 @@ const SignUp = memo(() => {
               style={styles.input}
               onChangeText={handleChange('firmaMail')}
               onBlur={handleBlur('firmaMail')}
-              value={values.firmaMail}
+              value={values.firmaMail.toLocaleLowerCase()}
+              status={touched.firmaMail && errors.firmaMail ? 'danger' : 'basic'}
+              caption={touched.firmaMail && errors.firmaMail ? errors.firmaMail : ''}
             />
-            {/* Şifre */}
             <Input
               label={'Şifre'}
               placeholder={'Şifre'}
@@ -159,14 +190,14 @@ const SignUp = memo(() => {
               onChangeText={handleChange('firmaPassword')}
               onBlur={handleBlur('firmaPassword')}
               value={values.firmaPassword}
+              status={touched.firmaPassword && errors.firmaPassword ? 'danger' : 'basic'}
+              caption={touched.firmaPassword && errors.firmaPassword ? errors.firmaPassword : ''}
             />
           </KeyboardAwareScrollView>
           <Layout mh={24} mb={12} gap={16}>
             <Button
               children="Hesap Oluştur"
-              onPress={() => {
-                handleSubmit();
-              }}
+              onPress={() => handleSubmit()}
             />
             <Layout horizontal gap={8} alignSelfCenter>
               <Text center>Zaten bir hesabınız var mı?</Text>
@@ -212,3 +243,30 @@ const themedStyles = StyleService.create({
     textAlign: 'center',
   },
 });
+
+const _country = {
+  code: 'AF',
+  dial_code: '+90',
+  flag: '🇹🇷',
+  name: {
+    bg: 'Афганистан',
+    by: 'Афганістан',
+    cn: '阿富汗',
+    cz: 'Afghánistán',
+    de: 'Afghanistan',
+    ee: 'Afganistan',
+    en: 'Afghanistan',
+    es: 'Afganistán',
+    fr: "L'Afghanistan",
+    he: 'אפגניסטן',
+    it: 'Afghanistan',
+    jp: 'アフガニスタン',
+    nl: 'Afghanistan',
+    pl: 'Afganistan',
+    pt: 'Afeganistão',
+    ro: 'Afganistan',
+    ru: 'Афганистан',
+    ua: 'Афганістан',
+    zh: '阿富汗',
+  },
+};

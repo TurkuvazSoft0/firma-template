@@ -32,6 +32,8 @@ import InviteFriends from 'screens/User/InviteFriend';
 // --------------------------------  Navigation ----------------------------------------
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Icon } from '@ui-kitten/components';
+import CompanyScreen from 'screens/User/SirketEkle';
+import { useStatusControl } from 'hooks/useStatus';
 
 const Stack = createStackNavigator<MainStackParamList>();
 const Tab = createBottomTabNavigator();
@@ -43,20 +45,25 @@ const TabIcon = ({ name, color, size }: { name: string; color: string; size: num
 
 // TabNavigator: Alt gezinme çubuğunda gösterilecek ana ekranlar
 function TabNavigator() {
+  const user_control = useStatusControl();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
 
-          if (route.name === 'Hizmet Ara') {
+          if (route.name === 'Şirket Ara') {
             iconName = focused ? 'search' : 'search-outline';
           } else if (route.name === 'Profil') {
             iconName = focused ? 'person' : 'person-outline';
-          } else if (route.name === 'Notifications') {
+          } else if (route.name === 'Bildirimler') {
             iconName = focused ? 'bell' : 'bell-outline';
           } else if (route.name === 'Profil') {
             iconName = focused ? 'message-circle' : 'message-circle-outline';
+          }
+          else if (route.name === 'Şirket Ekle' && user_control == "firma") {
+            iconName = focused ? 'plus-circle' : 'plus-circle-outline';
           }
 
           return <TabIcon name={iconName} color={color} size={size} />;
@@ -66,9 +73,14 @@ function TabNavigator() {
         headerShown: false,
       })}
     >
-      <Tab.Screen name="Hizmet Ara" component={SearchScreen} />
-      <Tab.Screen name="Notifications" component={NotificationScreen} />
-      
+
+      <Tab.Screen name="Şirket Ara" component={SearchScreen} />
+      <Tab.Screen name="Bildirimler" component={NotificationScreen} />
+
+      {
+        user_control == "firma" &&
+      <Tab.Screen name="Şirket Ekle" component={CompanyScreen} />
+      }
       <Tab.Screen name="Profil" component={EditProfile} />
 
  
@@ -91,7 +103,7 @@ export function MainStackNavigator() {
       {/* Doctor Screens */}
       <Stack.Screen name="FavoriteDoctor" component={FavoriteDoctor} />
       <Stack.Screen name="DetailsDoctor" component={DetailsDoctor} />
-
+      <Stack.Screen name='Şirket Ekle' component={CompanyScreen}/>
       {/* Messages */}
       <Stack.Screen name="ChatScreen" component={ChatScreen} />
       <Stack.Screen name="VoiceCallScreen" component={VoiceCallScreen} />
@@ -111,7 +123,7 @@ export function MainStackNavigator() {
       <Stack.Screen name="RescheduleAppointment" component={RescheduleAppointment} />
 
       {/* Notifications */}
-      <Stack.Screen name="NotificationScreen" component={NotificationScreen} />
+      <Stack.Screen name="Bildirimler" component={NotificationScreen} />
 
       {/* User Settings */}
       <Stack.Screen name="SecurityScreen" component={SecurityScreen} />

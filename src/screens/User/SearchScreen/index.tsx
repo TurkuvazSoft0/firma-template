@@ -44,13 +44,20 @@ import ModalItem from 'elements/ModalsItem';
 import { logout } from 'reduxs/reducers/UserSlice';
 import { AuthStackParamList } from 'types/navigation-types';
 import { AddBulkMail, setMailArray } from 'reduxs/reducers/teklifSlice';
-
+import GeneralModal from "../../../components/SearchScreens/Modals/GeneralModal"
+import { resetPasswordState } from 'reduxs/reducers/forgetPassword';
+import { resetStatusType } from 'reduxs/reducers/UserRegister';
 const SearchScreen = React.memo(() => {
+  const [isModalVisible, setModalVisible] = React.useState(false);
   const styles = useStyleSheet(themedStyles);
   const {top} = useLayout();
-  const [mail_list,setMailList] = React.useState<any>([]);
+  const [mailList, setMailList] = React.useState<string[] | any>([]);
+  useEffect(() => 
+    { 
+      console.log(mailList,"mail listverf");
+    },[mailList]);
   const { navigate } = useNavigation<NavigationProp<AuthStackParamList>>();
-
+  
   const GoogleIcon = (props) => (
     <Icon name='google' pack='eva' {...props} />
   );
@@ -65,20 +72,15 @@ const SearchScreen = React.memo(() => {
   const mail_lists  = useSelector((state: RootState) => state.teklif.mails_array);
   const mail  = useSelector((state: RootState) => state.teklif.mails);
   
+
+
+  
   const user_mail  = useSelector((state: RootState) => state.register.email);
 
   const [baslik, setBaslik] = React.useState<string | undefined>(undefined);
   const [icerik, setİcerik] = React.useState<string | undefined>(undefined);
-  
 
 
-  if (status === 'loading') {
-     
-        
-        <ActivityIndicator size="large" color="#0000ff" /> 
-
-        
-  }
   interface MailInfo {
     mail: string;
     tag: string;
@@ -280,47 +282,56 @@ interface Sirket {
 
 }
 
+
 const searchDoctor = React.useMemo(() => {
-  const searchResults = sirketler.filter(sirket =>
-    sirket.sirket_ad.toLowerCase().includes(searchValue.toLowerCase()),
-  );
+  if (!searchValue) return sirketler; // Arama yoksa tüm listeyi döndür
 
-  let newMailList = []; 
-  searchResults.forEach(sirket => {
-    sirket.sirket_veriler.sirket_mail.map((item) => 
-    {
-      dispatch(setMailArray(item.mail));
-    newMailList.push(item.mail);
-      setMailList(newMailList);
-    })
+  const searchValueUpper = searchValue.replace(/\s+/g, '').toLocaleUpperCase();
+  
+  return sirketler.filter((sirket: Sirket) => {
+    const sirketAdUpper = sirket.sirket_ad.replace(/\s+/g, '').toLocaleUpperCase();
+
+    // Şirket adıyla eşleşme kontrolü
+    if (sirketAdUpper.includes(searchValueUpper)) return true;
+
+    // Etiketlerde eşleşme kontrolü
+    return sirket.sirket_veriler.etiketler.some((etiket: Etiket) =>
+      etiket.value?.toLocaleUpperCase().replace(/\s+/g, '').includes(searchValueUpper)
+    );
   });
-
-  return searchResults;
-}, [searchValue]);
+}, [searchValue, sirketler]);
 
 
-const handleSubmit = () => { 
-
+const handleSubmit = () => {
   // FormData nesnesi oluşturma
   const formData = new FormData();
+
+  // FormData'ya diğer alanları ekleme
   formData.append('baslik', baslik);
   formData.append('mesaj', icerik);
-  formData.append("mail_adresi", user_mail);
-  // Eğer mail_lists doluysa ve iç içe geçmiş diziler varsa, flat ile tek boyutlu bir diziye dönüştür
+  formData.append('mail_adresi', user_mail);
 
-    const flattenedMailLists = mail_list.flat(); // İç içe dizileri düzleştiriyoruz
+  // Sadece mail adreslerini içeren bir dizi oluşturma
+  const mailAddresses = mailList?.map((item : any) => item?.mail);
   
-    console.log("Düzleştirilmiş mail listesi:", flattenedMailLists);
-    formData.append('mails', JSON.stringify(mail_list));
+  // mailAddresses'i JSON formatına dönüştürerek formData'ya ekleme
+  formData.append('mails', JSON.stringify(mailAddresses));
 
-
-  // Bu verileri dispatch ile gönderelim
+  // Veriyi dispatch ile gönderme
+  console.log(formData, "FormData içeriği:");
   dispatch(AddBulkMail(formData));
   Alert.alert("Bilgi", "Mail Gönderim İşlemi Başarılı");
 };
 
+const onClose = () => 
+  {
+    setModalVisible(false);
+  }
 
-
+const onOpen =  () => 
+  {
+    setModalVisible(true);
+  }
   const _onDetails = (doctor:IDoctorProps) => {
   openModal2();
   setSearchValue("");
@@ -328,27 +339,7 @@ const handleSubmit = () => {
   const ListHeaderComponent = () => {
     return (
       <CustomLayout level="3" mt={16}>
-        <FlatList
-          keyExtractor={keyExtractoUtil}
-          data={OPTIONS}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.contentTag}
-          horizontal
-          renderItem={({item: opt, index}) => {
-            const isActive = index === active;
-            return (
-              <TouchableOpacity
-                activeOpacity={0.7}
-                style={[styles.tag, isActive && styles.activeTag]}
-                onPress={() => {
-                  setActive(index);
-                }}
-                key={index}>
-                <Text status={isActive ? 'white' : 'primary'}>{opt}</Text>
-              </TouchableOpacity>
-            );
-          }}
-        />
+      
         {searchValue ? (
           <Text category="t5" marginLeft={24} marginTop={16} marginBottom={8}>
              Arama Kelimesi: "{searchValue}"
@@ -361,41 +352,38 @@ const handleSubmit = () => {
       </CustomLayout>
     );
   };
-  return (
+
+  {
+    if (status === 'loading') {
+      return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="blue" />
+          <Text>Yükleniyor...</Text>
+        </View>
+      );
+    }
+    else 
+    {
+    return (
     <Container style={styles.container} useSafeArea={false}>
       <CustomLayout style={[styles.nav, {paddingTop: top + 8}]}>
         <TopNavigation
-          title="Search"
-          accessoryLeft={() => <NavigationAction marginRight={12} />}
+        style={{marginLeft:20}}
+          title="Firmalar APP"
           accessoryRight={() => (
             <>  
             <NavigationAction
               icon={EvaIcons.LogOut}
               onPress={() => {
-                dispatch(logout())
+                dispatch(resetStatusType())
                 navigate("Login");
               }}
             />
 
-            <NavigationAction
-              icon={EvaIcons.Options2Outline}
-              onPress={() => {
-                open();
-              }}
-            />
+       
 
 
 
-
-<NavigationAction 
-
-              icon={EvaIcons.BellOutline}
-            
-              onPress={() => {
-                open();
-              }}
-            >
-            </NavigationAction>
 
 
 
@@ -424,222 +412,90 @@ const handleSubmit = () => {
           ListEmptyComponent={() => <ListEmptyDoctor />}
           data={searchValue ? searchDoctor : sirketler}
           keyExtractor={keyExtractoUtil}
-          renderItem={({item,index}) => {
+          
+          renderItem={({ item, index }) => {
+            console.log(item.sirket_veriler.etiketler,"sirket veriler");
+            console.log(searchDoctor.length,"ledwed");
+            const isLastItem = index === searchDoctor.length - 1; // Son item kontrolü
+          
             return (
-              <CustomLayout mh={24} onPress={()=>  {
-                
-                _onDetails(item),
-              setSirketId(index)
-            
-
+              <CustomLayout mh={24} onPress={() => {
+                _onDetails(item);
+                setSirketId(index);   
               }}>
-                <DoctorItem data={item}/>
-
+               
+                <DoctorItem setMailList={setMailList} searchValue={searchValue } onOpen={onOpen} data={item} />
+                
+            
+            {
+              isLastItem && 
+                  <Button 
+                    size='tiny'
+                    status='success'
+                    style={{marginTop:20,borderRadius:100}}
+                    onPress={() => {
+                      // Teklif al işlemini burada gerçekleştirin
+                open();
+                
+                    }} 
+                  >
+                    Teklif Al
+                  </Button>
+          }
               </CustomLayout>
             );
           }}
+          
         />
   
-<Modalize
-        ref={modalizeRef2} // Birinci modal ref
-        handlePosition="inside"
-        modalHeight={300}
-        modalStyle={{backgroundColor:"white"}}
-      
-      >
-    <CustomLayout level="2" style={styles.container} horizontal gap={12}>
-      {/* Şirket Adı */}
-      <CustomLayout style={{ flex: 1 }}>
-        <CustomLayout style={{display:"flex",flexDirection:"column"}} horizontal justify="space-between">
-          <Text category="t5" style={{textAlign:"center"}}> 
 
-            {
-              sirketler[sirketId]?.sirket_ad
-              
-            }
+  <Modalize
+  ref={ref}
+  scrollViewProps={{ showsVerticalScrollIndicator: false }}
+  handlePosition="inside"
+  
+  modalHeight={height / 2}
+  modalStyle={{ borderRadius: 40, marginHorizontal: 10, backgroundColor: "white" }}
+>
+  <CustomLayout level="3" mt={20} ph={34} style={{ height: '100%', paddingBottom: 20 }}>
+    <Text category="t4" style={{ marginHorizontal: 1, textAlign: 'center', marginBottom: 20,paddingTop:20 }}>
+      Teklif Al
+    </Text>
+    <Input
+      onChangeText={(value) => setBaslik(value)}
+      style={{ color:"black",backgroundColor: "black", marginBottom: 20 }}
+      placeholder='Teklif Başlığı'
 
-          </Text>
-          <View>   
-          <View style={{ marginLeft: 20, marginTop: 30, gap: 20 }}>
-
-{/* Mail */}
-<View>
-  {sirketler[sirketId]?.sirket_veriler?.sirket_mail.map((item) => {
-    return (
-      <View key={item?.mail} style={{ display: "flex", flexDirection: "row", gap: 10,flexWrap:"wrap" }}>
-        <AppIcon name={EvaIcons.Email} size={22} />
-        <Text>{item?.mail}</Text>
-        <Button
-          style={styles.button}
-          status='danger'
-          size='tiny'
-          onPress={() => openLink(`mailto:${item?.mail}`)} // Mail linkini açar
-        >
-          {item?.tag}
-        </Button>
-      </View>
-    );
-  })}
-</View>
-
-{/* Konum */}
-<View>
-{sirketler[sirketId]?.sirket_veriler?.sirket_konum.map((item, index) => {
-        const isYandexLink = item?.konum.includes('yandex'); // Yandex link kontrolü
-        return (
-          <View key={index} style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: 10 }}>
-            <AppIcon name={EvaIcons.Map} size={22} />
-            <View style={{ display: "flex", flexDirection: "row", gap: 10 }}>
-              {isYandexLink ? (
-                <Button
-                  style={styles.button}
-                  status='info'
-                  size='tiny'
-                  onPress={() => openLink(item.konum)} // Yandex linkini açar
-                >
-                  Yandex ile Aç
-                </Button>
-              ) : (
-                <Button
-                  style={styles.button}
-                  status='info'
-                  size='tiny'
-                  onPress={() => openLink(`https://www.google.com/maps?q=${item?.konum}`)} // Google Haritalar linkini açar
-                >
-                  Google ile Aç
-                </Button>
-              )}
-            </View>
-          </View>
-        );
-      })}
-</View>
-
-{/* Telefon */}
-<View>
-  {sirketler[sirketId]?.sirket_veriler?.sirket_telefon.map((item) => {
-    return (
-      <View key={item?.telefon} style={{ display: "flex", flexDirection: "row", gap: 10, alignItems: "center" }}>
-        <AppIcon name={EvaIcons.Phone} size={22} />
-        <Text>{item?.telefon}</Text>
-        <Button
-          style={styles.button}
-          status='info'
-          size='tiny'
-          onPress={() => openLink(`tel:${item?.telefon}`)} // Telefon arama
-        >
-          {item?.tag}
-        </Button>
-      </View>
-    );
-  })}
-</View>
-
-{/* Web Sitesi */}
-<View>
-  {sirketler[sirketId]?.sirket_veriler?.sirket_web.map((item) => {
-    return (
-      <View key={item} style={{ display: "flex", flexDirection: "row", gap: 10, alignItems: "center" }}>
-        <AppIcon name={EvaIcons.Globe} size={22} />
-        <Text>{item}</Text>
-        <Button
-          style={styles.button}
-          status='info'
-          size='tiny'
-          onPress={() => openLink(`https://${item}`)} // Web sitesine git
-        >
-          Git
-        </Button>
-      </View>
-    );
-  })}
-</View>
-
-{/* Referanslar */}
-<View>
-  {sirketler[sirketId]?.sirket_veriler?.sirket_referanslar.map((item) => {
-    return (
-      <View key={item} style={{ display: "flex", flexDirection: "row", gap: 10, alignItems: "center" }}>
-        <AppIcon name={EvaIcons.Person} size={22} />
-        <Text>{item}</Text>
-        <Button
-          style={styles.button}
-          status='primary'
-          size='tiny'
-        >
-          {item?.tag}
-        </Button>
-      </View>
-    );
-  })}
-</View>
-
-</View>
-          </View>
-        <View>
-
-
-
-
-        </View>
-        </CustomLayout>
-
+      accessoryLeft={props => (
+        <AppIcon
+          name={EvaIcons.MessageCircleOutline}
+          //@ts-ignore
+          size={props?.style.width}
+          //@ts-ignore
+          fill={props?.style.tintColor}
+        />
+      )}
+    />
     
-
-      </CustomLayout>
-    </CustomLayout>
-      </Modalize>
-
-
-<Modalize
-        ref={ref}
-        scrollViewProps={{ showsVerticalScrollIndicator: false }}
-
-        handlePosition="inside"
-        modalHeight={height / 2}
-        modalStyle={{borderRadius: 40,marginHorizontal:10,backgroundColor:"white"}}>
-        <CustomLayout level="3" mt={20} ph={34} style={{height:360}}>
-          <Text category="t4" style={{marginHorizontal:1}} center>
-            Teklif Al
-          </Text>
-        
-           <Input
-           onChangeText={(value) => setBaslik(value)}
-          style={{backgroundColor:"white",marginTop:20}}
-          placeholder='Teklif Başlığı'
-         accessoryLeft={props => (
-            <AppIcon
-              name={EvaIcons.MessageCircleOutline}
-              //@ts-ignore
-            
-              size={props?.style.width}
-              //@ts-ignore
-              fill={props?.style.tintColor}
-            />
-          )}/> 
-            <Input
-                       onChangeText={(value) => setİcerik(value)}
-
-          style={{backgroundColor:"white",marginTop:20,height:700}}
-          placeholder='Teklif İçeriği'
-        /> 
-         <Input
-                       onChangeText={(value) => setİcerik(value)}
-
-          style={{backgroundColor:"white",marginTop:20,height:700}}
-          placeholder='Teklif İçeriği'
-        /> 
-     
-        
-        </CustomLayout>
-        <Button  onPress={() => handleSubmit()} style={{zIndex:100}}>
-          Denemed
-        </Button>
-      </Modalize>
+   
+    <Input
+      onChangeText={(value) => setİcerik(value)}
+      textStyle={{height:"100%",minHeight:"100%"}}
+      style={{ backgroundColor: "black", height: 120,marginBottom:40 }} // Yüksekliği küçülttük
+      placeholder='Teklif İçeriği'
+    />
+    
+<Button status='primary'  onPress={() => handleSubmit()}>
+  Teklif Al
+</Button>
+  </CustomLayout>
+</Modalize>
 
 
     </Container>
   );
+}
+}
 });
 
 export default SearchScreen;
@@ -677,7 +533,7 @@ const themedStyles = StyleService.create({
     borderRadius: 99,
     paddingVertical: 4,
   },
-  contentTag: {
+  contentTag: { 
     gap: 8,
     paddingHorizontal: 24,
     marginTop: 24,

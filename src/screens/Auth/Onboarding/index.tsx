@@ -4,7 +4,7 @@ import {Button, Icon, TopNavigation, useTheme} from '@ui-kitten/components';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {useLayout} from 'hooks';
 
-import {Container, Content, CustomLayout, IDivider, Text} from 'components';
+import {Container, Content, CustomLayout, IDivider, NavigationAction, Text} from 'components';
 import {Images} from 'assets/images';
 import {AuthStackParamList} from 'types/navigation-types';
 
@@ -20,15 +20,17 @@ const OnBoarding = React.memo(() => {
   const themeMode = app.theme;
   const isDarkMode = themeMode === ThemeMode.DARK;
 
-  const _onSignUp = () => {
+  const _onLogin = () => {
     navigate('Signup');
   };
-  const _onLogin = () => {
-    navigate('Login');
-  };
+  const __onMusteriLogin = () => 
+    { 
+      navigate("MusteriSignup"); 
+    }
+    
   return (
     <Container level="1" style={styles.container}>
-      <TopNavigation />
+              <TopNavigation accessoryLeft={() => <NavigationAction />} />
       <Content contentContainerStyle={styles.content}>
         <Image
           source={isDarkMode ? Images.dark_logo : Images.logo}
@@ -39,14 +41,15 @@ const OnBoarding = React.memo(() => {
           Hoş Geldiniz 
           </Text>
           <Button
+          
             status="dark"
-            onPress={_onLogin}
-            children={'Müşteri Kayıt '}
+            onPress={__onMusteriLogin}
+            children={'Kullanıcı Kayıt '}
           />
           <Button
             status="danger"
             onPress={_onLogin}
-            children={'Firma Kayıt '}
+            children={' Kurumsal Kayıt '}
           />
           
           <CustomLayout
@@ -60,12 +63,6 @@ const OnBoarding = React.memo(() => {
         
         </CustomLayout>
       </Content>
-      <CustomLayout horizontal gap={8} alignSelfCenter mb={16}>
-        <Text status="platinum">Hesabın Yokmu ?</Text>
-        <Text status="primary" onPress={_onSignUp}>
-        Kayıt Ol
-        </Text>
-      </CustomLayout>
     </Container>
   );
 });

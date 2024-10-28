@@ -54,7 +54,7 @@ const SettingsScreen = React.memo(() => {
         return (
           <Container style={styles.container} level="1">
             <TopNavigation
-              title="Notifications"
+              title="Bildirimler"
               accessoryLeft={() => <NavigationAction marginRight={12} />}
             />
             <Content contentContainerStyle={styles.content}>

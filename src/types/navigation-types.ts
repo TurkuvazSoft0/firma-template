@@ -24,6 +24,8 @@ export type AuthStackParamList = {
   CreatePassword: undefined;
   CreatePin: undefined;
   ChangePassword: undefined;
+  MusteriSignup:undefined
+  MusteriLogin:undefined;
 };
 export type BottomTabParamList = {
   Home: undefined;
@@ -40,6 +42,10 @@ export type MainStackParamList = {
   Notification: undefined;
   FavoriteDoctor: undefined;
   TopDoctor: undefined;
+  CompanyAdd:undefined,
+  Bildirimler:undefined,
+  SirketEkle:undefined,
+  TabNavigator:undefined,
   SearchScreen: undefined;
   DetailsDoctor: {doctor: IDoctorProps};
   ChatScreen: {user: IDoctorProps};

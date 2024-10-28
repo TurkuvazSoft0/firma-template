@@ -1,5 +1,5 @@
-import React from 'react';
-import {Image} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {Alert, Image} from 'react-native';
 // ----------------------------- UI kitten -----------------------------------
 import { TopNavigation, StyleService, useStyleSheet, useTheme, Input, Button } from '@ui-kitten/components';
 // ----------------------------- Navigation -----------------------------------
@@ -17,14 +17,34 @@ import EvaIcons from 'types/eva-icon-enum';
 import {appSelector, ThemeMode} from 'reduxs/reducers/app-reducer';
 import {useAppSelector} from 'reduxs/store';
 import { navigate } from 'navigation/root-navigation';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from "reduxs/store";
+import { SendPasswordResetEmail,setMail } from 'reduxs/reducers/forgetPassword';
 
 type FormikType = {
-  password: string;
-  new_password: string;
-  re_password: string;
+email:string | null
 };
 
 const ChangePassword = React.memo(() => {
+  const emailSend  = useSelector((state: RootState) => state.passwordReset.emailSent);
+  const dispatch = useDispatch<AppDispatch>();
+
+  const handlePress = (email : string | null ) => 
+    {
+      
+      const formData = new FormData();
+      formData.append("email",email);
+      dispatch(SendPasswordResetEmail(formData));
+      dispatch(setMail(email));
+      if(emailSend)
+      {
+        navigate("CreatePin");
+      }
+    }
+    useEffect(() => 
+      { 
+navigate("CreatePin");
+      },[emailSend]);
   const styles = useStyleSheet(themedStyles);
   const {goBack} = useNavigation();
   const {height, width, top, bottom} = useLayout();
@@ -64,8 +84,8 @@ const ChangePassword = React.memo(() => {
                 placeholder="Email"
                 onChangeText={handleChange('email')}
                 onBlur={handleBlur('email')}
-                value={values.password}
-                secureTextEntry={!show}
+                value={values.email?.toLocaleLowerCase()}
+                
                 //@ts-ignore
                 accessoryLeft={({style}) => (
                   <CustomLayout itemsCenter ml={8} mr={4}>
@@ -82,7 +102,7 @@ const ChangePassword = React.memo(() => {
                     category="c1"
                     marginRight={4}
                     onPress={togglePassword}>
-                    {!show ? 'Göster' : 'Gizle'}
+                 
                   </Text>
                 )}
               />
@@ -91,7 +111,7 @@ const ChangePassword = React.memo(() => {
             <Button
               children={'Gönder'}
               style={styles.submit}
-              onPress={() => navigate("CreatePin")}
+              onPress={(e) => handlePress(values.email)}
             />
           </Container>
         );

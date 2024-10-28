@@ -1,18 +1,48 @@
-import React, {memo} from 'react';
+import React, {memo, useState} from 'react';
 // ----------------------------- UI kitten -----------------------------------
 import {Input, Button, StyleService, useStyleSheet} from '@ui-kitten/components';
 // ----------------------------- Hook -----------------------------------------
 import { useToggle} from 'hooks';
 // ----------------------------- Navigation -----------------------------------
 import { AuthStackParamList } from 'types/navigation-types';
-import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {NavigationProp, RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 // ----------------------------- Components & Elements ------------------------
 import {Container, Content, Text, CustomLayout as Layout} from 'components';
+import { useRouteParamList } from 'types/route-types';
+import { Alert } from 'react-native';
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "reduxs/store";
+import { VerifyPasswordResetCode } from 'reduxs/reducers/forgetPassword';
+import { navigate } from 'navigation/root-navigation';
 
 const CreatePassword = memo(() => {
-  const {navigate} = useNavigation<NavigationProp<AuthStackParamList>>();
-  const styles = useStyleSheet(themedStyles);
+  const dispatch = useDispatch<AppDispatch>();
+  const [password, setPassword] = useState<string>('');
+  const [passwordAgain, setPasswordAgain] = useState<string>('');
+  const { navigate: authNavigate } = useNavigation<NavigationProp<AuthStackParamList>>();
 
+
+
+
+  const styles = useStyleSheet(themedStyles);
+   const email  = useSelector((state: RootState) => state.passwordReset.emailAdress);
+   const code  = useSelector((state: RootState) => state.passwordReset.codeNumber);
+
+   const handleSubmit = () => 
+    { 
+      const formData = new FormData();
+      console.log(code,"code");
+      formData.append("email",email);
+      formData.append("code",code);
+      formData.append("new_password",password);
+      dispatch(VerifyPasswordResetCode(formData));
+      authNavigate("Login");
+
+    }
+   
+
+    
+  
   const [show, toggle] = useToggle(true);
   return (
     <Container style={styles.container}>
@@ -23,39 +53,40 @@ const CreatePassword = memo(() => {
           </Text>
         }
       /> */}
-      <Content contentContainerStyle={styles.content}>
+   <Content contentContainerStyle={styles.content}>
         <Layout gap={8}>
-          <Text category="t2">Create Password</Text>
+          <Text category="t2">Şifre Oluştur</Text>
           <Text category="subhead" opacity={0.7}>
-            You need to secure your account.
+            Hesabınızı güvence altına almanız gerekiyor.
           </Text>
         </Layout>
         <Layout gap={4}>
-          <Text category="subhead" opacity={0.7}>
-            Password
+          <Text category="subhead"  opacity={0.7}>
+            Şifre
           </Text>
           <Input
-            placeholder="Password"
+          onChangeText={(e) => setPassword(e)}
+            placeholder="Şifre"
             secureTextEntry={show}
             style={styles.input}
             accessoryRight={() => (
-              <Text status="primary" category='c1' marginRight={4}>{show ? 'Hide' : 'Show'}</Text>
+              <Text status="primary" category='c1' marginRight={4}>{show ? 'Gizle' : 'Göster'}</Text>
             )}
           />
-          <Input placeholder="Re-Password" secureTextEntry={show} />
+          <Input onChangeText={(e) => setPasswordAgain(e)} placeholder="Şifreyi Yeniden Gir" secureTextEntry={show} />
           <Layout
             horizontal
             justify="flex-start"
             style={{alignItems: 'flex-start'}}
             gap={4}>
             <Text category="subhead" status="placeholder">
-              Must be more than 8 characters and contain at least one capital
-              letter, one number and one special character
+              8 karakterden uzun olmalı ve en az bir büyük harf, bir sayı ve bir özel karakter içermelidir.
             </Text>
           </Layout>
         </Layout>
-        <Button children={'Continue'} onPress={()=>{navigate('CreatePin')}}/>
-      </Content>
+        <Button children={'Devam Et'} onPress={handleSubmit}/>
+</Content>
+
     </Container>
   );
 });

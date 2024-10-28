@@ -1,11 +1,11 @@
 export const Images = {
-  logo: require('./mobil_uygulama_resmi.png'),
+  logo: require('./remove-mobile-app.png'),
   dark_logo: require('./remove-mobile-app.png'),
-  logo_fill: require('./img_fill_logo.png'),
+  logo_fill: require('./remove-mobile-app.png'),
   avatar: require('./img_avatar.png'),
-  walkthrough01: require('./img_walkthrough_01.png'),
-  walkthrough02: require('./img_walkthrough_02.png'),
-  walkthrough03: require('./img_walkthrough_03.png'),
+  walkthrough01: require('./1.png'),
+  walkthrough02: require('./kisspng-web-development-mobile-app-app-store-optimization-vector-mobile-search-5a82eab1293ec7.805147371518529201169.png'),
+  walkthrough03: require('./pngtree-modern-flat-design-concept-of-ui-ux-design-with-characters-and-png-image_5332907.png'),
   lottie: {
     loading: require('./loading.json'),
     success: require('./success.json'),

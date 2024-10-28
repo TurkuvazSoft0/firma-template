@@ -3,7 +3,7 @@ import {Image} from 'react-native'
 // ----------------------------- UI kitten -----------------------------------
 import { StyleService, useStyleSheet, Button, TopNavigation } from '@ui-kitten/components';
 // ----------------------------- @Types -----------------------------------
-import { RootStackParamList } from 'types/navigation-types';
+import { AuthStackParamList, RootStackParamList } from 'types/navigation-types';
 // ----------------------------- Navigation -----------------------------------
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 // ----------------------------- Components -----------------------------------
@@ -13,9 +13,12 @@ import { Images } from 'assets/images';
 import { useAppDispatch, useAppSelector } from 'reduxs/store';
 import { ThemeMode, appSelector, setAppLoading } from 'reduxs/reducers/app-reducer';
 import { waitUtil } from 'utils/waitUtil';
+import { setCodes } from 'reduxs/reducers/forgetPassword';
 
 const CreatePin = memo(() => {
   const {navigate} = useNavigation<NavigationProp<RootStackParamList>>();
+
+  const navigation = useNavigation<NavigationProp<AuthStackParamList>>();
   const styles = useStyleSheet(themedStyles);
   const dispatch=useAppDispatch()
   
@@ -25,10 +28,11 @@ const CreatePin = memo(() => {
 
   const [code, setCode] = React.useState('');
   const _onFinish=()=>{
+    dispatch(setCodes(code));
     dispatch(setAppLoading(true))
     waitUtil(1200).then(()=>{
-      dispatch(setAppLoading(false))
-      navigate('MainStack')
+      navigation.navigate("CreatePassword");
+      dispatch(setAppLoading(false));
     })
   }
   return (
@@ -47,7 +51,7 @@ const CreatePin = memo(() => {
           />
         </Layout>
         <Text category="subhead" status="placeholder" marginBottom={40}>
-          Lütfen Mailinize Gelen 6 haneli kodu giriniz
+          Lütfen Mailinize Gelen 5 haneli kodu giriniz
         </Text>
         <Button children='Kaydet' onPress={_onFinish}/>
       </Content>

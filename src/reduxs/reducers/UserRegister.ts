@@ -3,7 +3,7 @@ import axios from 'react-native-axios';
 import { Alert } from 'react-native';
 import { navigate } from 'navigation/root-navigation';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { AuthStackParamList, RootStackParamList } from 'types/navigation-types';
+import { AuthStackParamList, MainStackParamList, RootStackParamList } from 'types/navigation-types';
 
 // Kullanıcı durumu için arayüz tanımı
 interface IRegisterState {
@@ -121,19 +121,15 @@ export const firmaUserAdd = createAsyncThunk(
 // Kullanıcı login kontrol asenkron thunk
 export const loginUser = createAsyncThunk(
   'user/logincontrol',
-  async (formData: Record<string, string>, { rejectWithValue }) => {
-    try {
-      const params = new URLSearchParams();
-      for (const key in formData) {
-        params.append(key, formData[key]);
-      }
+  async (formData: FormData, { rejectWithValue }) => {
+ 
 
       const response = await axios.post(
         'https://mobileapp.turkuvazprojeler.com/login-control.php',
-        params,
+        formData,
         {
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': 'multipart/form-data',
           },
         }
       );
@@ -143,10 +139,8 @@ export const loginUser = createAsyncThunk(
       }
 
       return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data || error.message);
-    }
-  }
+    } 
+  
 );
 
 // User slice tanımı
@@ -163,28 +157,56 @@ const userSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(firmaUserAdd.fulfilled, (state, action) => {
-      Alert.alert("Bilgi", action.payload.message);
+      console.log("full filed");
+if(action.payload.message) 
+{
+  Alert.alert("Bilgi",action.payload.message);
+}
+
+else 
+{
+  console.log("text geldi")
+Alert.alert("Bilgi","Kayıt İşlemi Başarılı");
+        
+      setTimeout(() => {
+        navigate("Login")
+      },2000);
+
+    }
     }).addCase(firmaUserAdd.rejected, () => {
       Alert.alert("Hata", "Sunucu taraflı sorun oluştu.");
     });
 
     builder.addCase(loginUser.fulfilled, (state, action) => {
+      console.log("full filed",action.payload);
+
       if (action.payload.message) {
         Alert.alert("Bilgi", action.payload.message);
       }
 
+      // MainStack'teki navigate fonksiyonu zaten mevcut
       state.status_type = action.payload.type;
       state.username = action.payload.username;
       state.email = action.payload.email;
       state.id = action.payload.id;
       state.firma_telefon = action.payload.telefon;
+    
     });
 
     builder.addCase(registerUser.fulfilled, (state, action) => {
       state.loading = false;
-      if (action.payload.message) {
-        Alert.alert("Bilgi", action.payload.message);
-      }
+      console.log(action.payload,"payload mesajı");
+      if(action.payload.message) 
+        {
+          Alert.alert("Bilgi",action.payload.message);
+        }
+        else if(action.payload.text)
+        {
+        Alert.alert("Bilgi",action.payload.text);
+                
+                navigate("MusteriLogin")
+        
+            }
     });
 
     builder.addCase(registerUser.rejected, (state, action) => {
@@ -194,8 +216,10 @@ const userSlice = createSlice({
     });
 
     builder.addCase(firmaUserControl.fulfilled, (state, action) => {
+      console.log(action.payload,"action payload mesajı");
       if (action.payload.message) {
         Alert.alert("Bilgi", action.payload.message);
+        
         return;
       }
 

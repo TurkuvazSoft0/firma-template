@@ -123,7 +123,6 @@ export const mailSlice = createSlice({
       })
       .addCase(AddBulkMail.fulfilled, (state: MailState, action: PayloadAction<any>) => {
         state.status = 'succeeded';
-        Alert.alert('Bilgi', action.payload);
       })
       .addCase(AddBulkMail.rejected, (state: MailState, action: PayloadAction<any>) => {
         state.status = 'failed';

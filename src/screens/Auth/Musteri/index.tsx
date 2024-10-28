@@ -1,5 +1,5 @@
 import React, { memo, useEffect } from 'react';
-import { Image } from 'react-native';
+import { Alert, Image } from 'react-native';
 import { Formik } from 'formik';
 import { Input, Button, StyleService, useStyleSheet, TopNavigation } from '@ui-kitten/components';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
@@ -12,37 +12,18 @@ import EvaIcons from 'types/eva-icon-enum';
 import { useLayout } from 'hooks';
 import { useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from "reduxs/store";
-import { firmaUserControl } from 'reduxs/reducers/UserRegister';
+import { firmaUserControl, loginUser } from 'reduxs/reducers/UserRegister';
 import { useStatusControl } from 'hooks/useStatus';
-
 type FormikForm = {
   account: string;
   country: string;
   password: string;
 };
 
-const Login = memo(() => {
+const MusteriLogin = memo(() => {
 
 const user_control = useStatusControl();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-useEffect(() => 
-  {
-    if(user_control == "firma" || user_control == "musteri")
-navigation.navigate("MainStack");
-  },[user_control]);
 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -57,13 +38,11 @@ navigation.navigate("MainStack");
     password: '',
   };
 
+
   const onSignup = () => {
     navigate('Onboarding');
   };
-  const onForget = () => 
-    {
-      navigate("ChangePassword");
-    }
+  navigation.navigate("MainStack");
   // Email doğrulama için düzenli ifade.
   const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,})+$/;
   const formData = new FormData();
@@ -71,18 +50,15 @@ navigation.navigate("MainStack");
   // Backend'e gönderilecek form verileri
   const handleLogin = async (values: FormikForm) => {
     formData.append("mail", values.account);
-    formData.append("status","firma");
+    formData.append("status","musteri");
     formData.append("password", values.password);
     console.log(formData,"wefwe")
     console.log(formData);
-    dispatch(firmaUserControl(formData));
-  if(user_control)
-  {
-    navigation.navigate("MainStack");
-  }
+    dispatch(loginUser(formData));
+  
+  
   };
 
-  
   return (
     <Formik
       initialValues={initValues}
@@ -121,7 +97,8 @@ navigation.navigate("MainStack");
                 />
               </Layout>
               <Layout padding={16} gap={16}>
-                <Button children={'Giriş Yap'} onPress={handleSubmit} />
+                <Button children={'Giriş Yap'} onPress={
+               handleSubmit} />
                 <Layout gap={4} mt={8} horizontal justify="center">
                   <Text center status="placeholder">
                     Hesabınız yok mu?
@@ -130,14 +107,6 @@ navigation.navigate("MainStack");
                     Kayıt Ol
                   </Text>
                 </Layout>
-                <Layout gap={4} mt={8} horizontal justify="center">
-                  <Text status="primary" onPress={onForget}>
-                    Şifremi Unuttum
-                  </Text>
-                </Layout>
-
-
-
               </Layout>
             </Content>
           </Container>
@@ -147,7 +116,7 @@ navigation.navigate("MainStack");
   );
 });
 
-export default Login;
+export default MusteriLogin;
 
 const themedStyles = StyleService.create({
   container: {

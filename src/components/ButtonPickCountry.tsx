@@ -76,7 +76,7 @@ const ButtonPickCountry = memo(
           }}
         >
           <Text category="t5" marginBottom={16}>
-            Popular countries
+        Popüler Ülkeler
           </Text>
           {countries?.map((country, index) => {
             let itemName = country?.name[lang];
@@ -96,7 +96,7 @@ const ButtonPickCountry = memo(
             );
           })}
           <Text category="t5" marginTop={24}>
-            Result
+            Sonuç 
           </Text>
         </CustomLayout>
       );
