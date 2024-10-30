@@ -286,17 +286,18 @@ interface Sirket {
 const searchDoctor = React.useMemo(() => {
   if (!searchValue) return sirketler; // Arama yoksa tüm listeyi döndür
 
-  const searchValueUpper = searchValue.replace(/\s+/g, '').toLocaleUpperCase();
+  const searchValueUpper = searchValue.replace(/\s+/g, '').toLocaleUpperCase('tr-TR');
+  const searchValueLower = searchValue.replace(/\s+/g, '').toLocaleLowerCase('tr-TR');
   
   return sirketler.filter((sirket: Sirket) => {
-    const sirketAdUpper = sirket.sirket_ad.replace(/\s+/g, '').toLocaleUpperCase();
+    const sirketAdUpper = sirket.sirket_ad.replace(/\s+/g, '').toLocaleUpperCase('tr-TR');
 
     // Şirket adıyla eşleşme kontrolü
     if (sirketAdUpper.includes(searchValueUpper)) return true;
 
     // Etiketlerde eşleşme kontrolü
     return sirket.sirket_veriler.etiketler.some((etiket: Etiket) =>
-      etiket.value?.toLocaleUpperCase().replace(/\s+/g, '').includes(searchValueUpper)
+      etiket.value?.toLocaleLowerCase('tr-TR').replace(/\s+/g, '').includes(searchValueLower)
     );
   });
 }, [searchValue, sirketler]);

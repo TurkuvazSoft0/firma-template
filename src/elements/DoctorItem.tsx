@@ -12,7 +12,7 @@ import { CustomLayout, Text } from 'components';
 import GeneralModal from 'components/SearchScreens/Modals/GeneralModal';
 import { useLayout } from 'hooks';
 
-const DoctorItem = React.memo(({ data, onOpen,searchValue,setMailList }: { data: any,setMailList:any, onOpen: any,searchValue:any }) => {
+const f>DoctorItem = React.memo(({ data, onOpen,searchValue,setMailList }: { data: any,setMailList:any, onOpen: any,searchValue:any }) => {
   const theme = useTheme();
   const { width } = useLayout();
   const styles = useStyleSheet(themedStyles);
