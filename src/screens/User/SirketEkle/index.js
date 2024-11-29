@@ -388,6 +388,7 @@ const handleSubmit = () => {
      <Content contentContainerStyle={styles.content}> 
 
      <TopNavigation
+     style={{marginLeft:-23}}
               title={''}
               accessoryLeft={() => <NavigationAction    />}
             />

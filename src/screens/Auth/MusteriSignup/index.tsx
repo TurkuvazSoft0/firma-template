@@ -26,7 +26,7 @@ type FormikForm = {
 // Yup ile validasyon şeması oluşturuyoruz
 const SignupSchema = Yup.object().shape({
   name: Yup.string().required('Ad zorunludur'),
-  email: Yup.string().email('Geçerli bir e-posta giriniz').required('E-posta zorunludur').lowercase(),
+  email: Yup.string().required("Email Alanı Zorunludur").matches(/@/, 'E-posta adresinde "@" işareti bulunmalıdır'),  
   password: Yup.string().required('Şifre zorunludur'),
   phone: Yup.string()
     .matches(/^[0-9]+$/, "Sadece rakamlar kullanılabilir")
@@ -86,7 +86,13 @@ const MusteriSignup = memo(() => {
               label={'Adınız'}
               placeholder={'Lütfen adınızı giriniz'}
               style={styles.input}
-              onChangeText={handleChange('name')}
+              onChangeText={(text) => {
+                const formattedText = text
+                  .split(' ')
+                  .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                  .join(' ');
+                handleChange('name')(formattedText);
+              }}
               onBlur={handleBlur('name')}
               value={values.name}
               status={touched.name && errors.name ? 'danger' : 'basic'}
@@ -105,9 +111,9 @@ const MusteriSignup = memo(() => {
                 onBlur={handleBlur('phone')}
                 value={values.phone}
                 style={{width:"80%"}}
+                keyboardType='numeric'
                 status={touched.phone && errors.phone ? 'danger' : 'basic'}
                 caption={touched.phone && errors.phone ? errors.phone : ''}
-                // Telefon numarasına ülke kodunu ekliyoruz
                 accessoryLeft={({style}) => {
                   return (
                     values.country?.dial_code && (

@@ -48,6 +48,7 @@ export const AddBulkMail = createAsyncThunk(
 export const GetFullMail = createAsyncThunk(
   'mails/GetFullMail',
   async (data: FormData, { rejectWithValue }) => {
+    console.log(data,"d gelen ata");
     try {
       const response = await axios.post(
         'https://mobileapp.turkuvazprojeler.com/mail-al.php',

@@ -5,6 +5,7 @@ import {StyleService, useStyleSheet, useTheme} from '@ui-kitten/components';
 import {useNavigation} from '@react-navigation/native';
 // ----------------------------- Hooks ---------------------------------------
 import {useLayout} from 'hooks';
+import tw from "twrnc";
 // ----------------------------- Components && Elements -----------------------
 import {AppIcon, CustomLayout, IDivider, ReadMoreText, Text} from 'components';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
@@ -20,83 +21,32 @@ export interface INotificationItemProps {
   createAt: string;
   describe: string;
   readed: boolean;
-  firma_baslik:string,
-  firma_mesaj:string ,
-  firma_mail:string,
-  mail_adresi:string,
-  mail_durum:number,
-  onPress:any,
-  status:any
+  firma_baslik: string;
+  firma_mesaj: string;
+  firma_mail: string;
+  mail_adresi: string;
+  mail_durum: number;
+  onPress: any;
 }
 
-const NotificationItem = ({
+const UserNotificationsItem = ({
   data,
   lastItem,
   onPress,
-  mail_id,
-  status
+  mail_id
 }: {
   data: INotificationItemProps;
   lastItem: boolean;
-  onPress:any,
-  mail_id:number,
-  status:any
+  onPress: any;
+  mail_id: number;
 }) => {
-  console.log(data,"wedwe");
-  const {type,mail_adresi, firma_baslik, firma_mesaj, describe, readed,mail_durum} = data;
+  const {type, mail_adresi, firma_baslik, firma_mesaj, describe, readed, mail_durum,mail_tarih,firma_mail} = data;
   const theme = useTheme();
   const styles = useStyleSheet(themedStyles);
-  const {goBack} = useNavigation();
   const {height, width, top, bottom} = useLayout();
-console.log(data,"datas")
   const ButtonAnimation = Animated.createAnimatedComponent(TouchableOpacity);
 
-  const renderIcon = () => {
-    switch (mail_durum) {
-      case 2:  // mail_durum 2 ise primary
-        return (
-          <CustomLayout
-            padding={12}
-            border={99}
-            style={{ backgroundColor: `${theme['color-primary-default']}40` }}
-          >
-            <AppIcon
-              name={EvaIcons.FileAdd}
-              fill={theme['color-primary-default']}
-            />
-          </CustomLayout>
-        );
-      case 1:  // mail_durum 1 ise success (yeşil)
-        return (
-          <CustomLayout
-            padding={12}
-            border={99}
-            style={{ backgroundColor: `${theme['color-success-default']}40` }}
-          >
-            <AppIcon
-              name={EvaIcons.CheckmarkCircle}
-              fill={theme['color-success-default']}
-            />
-          </CustomLayout>
-        );
-      case 0:  // mail_durum 0 ise danger (kırmızı)
-        return (
-          <CustomLayout
-            padding={12}
-            border={99}
-            style={{ backgroundColor: `${theme['color-danger-default']}40` }}
-          >
-            <AppIcon
-              name={EvaIcons.CloseSquare}
-              fill={theme['color-danger-default']}
-            />
-          </CustomLayout>
-        );
-      default:
-        return null;
-    }
-  };
-  
+ 
   const size_button = 80 * (width / 375);
   const renderLeftActions = (
     progressAnimatedValue: Animated.AnimatedInterpolation<string | number>,
@@ -107,25 +57,28 @@ console.log(data,"datas")
       outputRange: [0, 0.3, 1, 1],
     });
     return (
-      <ButtonAnimation
-        onPress={() => {}}
-        style={{
-          transform: [{scale}],
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: size_button,
-          backgroundColor: theme['text-danger-color'],
-          borderWidth: 0.5,
-          borderRadius: 4,
-          borderColor: theme['text-basic-color'],
-        }}>
-        <AppIcon
-          name={EvaIcons.Trash2Outline}
-          fill={theme['text-white-color']}
-        />
-      </ButtonAnimation>
+      <>
+        <ButtonAnimation
+          onPress={() => {}}
+          style={{
+            transform: [{scale}],
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: size_button,
+            backgroundColor: theme['text-danger-color'],
+            borderWidth: 0.5,
+            borderRadius: 4,
+            borderColor: theme['text-basic-color'],
+          }}>
+          <AppIcon
+            name={EvaIcons.Trash2Outline}
+            fill={theme['text-white-color']}
+          />
+        </ButtonAnimation>
+      </>
     );
   };
+
   const renderRightActions = (
     progressAnimatedValue: Animated.AnimatedInterpolation<string | number>,
     dragAnimatedValue: Animated.AnimatedInterpolation<string | number>,
@@ -192,67 +145,43 @@ console.log(data,"datas")
   };
 
   return (
-  
-        <CustomLayout style={{display:"flex",flexDirection:"row"}}>   
-      <CustomLayout style={styles.container} level="1" >
-        <CustomLayout horizontal itemsCenter gap={16} mb={16} mh={16}>
-      
-          <CustomLayout gap={4}>
-            <Text category="body">{firma_baslik}</Text>
-            <Text status="placeholder" category="subhead">
-              2023
-            </Text>
-            <Text status="placeholder" category="subhead">
-              {mail_adresi}
-            </Text>
+    <Swipeable rightThreshold={0} marginBottom={10}>
+      <CustomLayout style={{display: "flex", flexDirection: "row",marginBottom:20,marginHorizontal:10,borderRadius:30}}>
+        <CustomLayout 
+          style={[
+            styles.container,
+            { backgroundColor: mail_durum === 1 ? theme['color-success-default'] : mail_durum === 0 ? theme['color-danger-default'] : mail_durum === 2 ? theme['color-warning-default'] : theme['color-basic-100'] }]} 
+          level="1"
+        >
+          <CustomLayout horizontal itemsCenter gap={16} mb={16} mh={16}>
+            <CustomLayout gap={4}>
+              <Text category="body">{firma_baslik}</Text>
+              <Text status="placeholder" style={{color:"white"}} category="subhead">
+                {mail_tarih}
+              </Text>
+              <Text status="placeholder" category="subhead" style={tw`text-gray-200`}>
+                {firma_mail}
+              </Text>
+            </CustomLayout>
           </CustomLayout>
+          <Text category="subhead" marginHorizontal={16} status="platinum" style={tw`text-gray-300`}>
+            {firma_mesaj}
+          </Text>
+
+          <CustomLayout style={{display: "flex", flexDirection: "row", gap: 10, marginLeft: 10}}>
           
-        </CustomLayout>
-        <Text category="subhead" marginHorizontal={16} status="platinum">
-          {firma_mesaj}
-        </Text>
-      {status != "musteri" && (
-        <CustomLayout style={{ display: "flex", flexDirection: "row", gap: 10, marginLeft: 10 }}>
-          <CustomLayout
-            onPress={() => onPress(1, mail_id)}
-            padding={12}
-            border={99}
-            style={{ backgroundColor: `${theme['color-success-default']}40` }}
-          >
-            <AppIcon
-              name={EvaIcons.CheckmarkCircle}
-              fill={theme['color-success-default']}
-            />
           </CustomLayout>
-          <CustomLayout
-            onPress={() => onPress(0, mail_id)}
-            padding={12}
-            border={99}
-            style={{ backgroundColor: `${theme['color-danger-default']}40` }}
-          >
-            <AppIcon
-              name={EvaIcons.CloseSquare}
-              fill={theme['color-danger-default']}
-            />
-          </CustomLayout>
+          {!lastItem && <IDivider marginTop={8} />}
+          {readed && (
+            <CustomLayout style={styles.read} />
+          )}
         </CustomLayout>
-      )}
-      {!lastItem && <IDivider marginTop={8} />}
-      {readed && (
-        <CustomLayout style={styles.read}>
-          {/* <Text status="white" category="c1">
-            {'New'}
-          </Text> */}
-        </CustomLayout>
-      )}
-          
       </CustomLayout>
-</CustomLayout> 
- 
+    </Swipeable>
   );
 };
 
-export default NotificationItem;
+export default UserNotificationsItem;
 
 const themedStyles = StyleService.create({
   container: {
@@ -262,6 +191,7 @@ const themedStyles = StyleService.create({
   read: {
     paddingVertical: 2,
     paddingHorizontal: 6,
+    color: "white",
     borderRadius: 4,
     backgroundColor: 'color-primary-default',
     position: 'absolute',

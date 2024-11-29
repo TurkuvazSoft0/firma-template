@@ -44,8 +44,10 @@ export type MainStackParamList = {
   TopDoctor: undefined;
   CompanyAdd:undefined,
   Bildirimler:undefined,
+  BildirimlerMusteri:undefined,
   SirketEkle:undefined,
   TabNavigator:undefined,
+  Tekliflerim:undefined,
   SearchScreen: undefined;
   DetailsDoctor: {doctor: IDoctorProps};
   ChatScreen: {user: IDoctorProps};

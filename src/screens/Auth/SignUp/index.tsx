@@ -31,7 +31,7 @@ const validationSchema = Yup.object().shape({
   firmaVergiDairesi: Yup.string().required('Vergi dairesi zorunludur'),
   firmaVergiNumarasi: Yup.string().required('Vergi numarası zorunludur').matches(/^[0-9]+$/, 'Sadece sayılar girin'),
   firmaTelefon: Yup.string().required('Telefon numarası zorunludur').matches(/^[0-9]+$/, 'Sadece sayılar girin'),
-  firmaMail: Yup.string().email('Geçerli bir e-posta adresi girin').required('E-posta adresi zorunludur'),
+  firmaMail: Yup.string().required('E-posta adresi zorunludur').matches(/@/, 'E-posta adresinde "@" işareti bulunmalıdır'),
   firmaPassword: Yup.string().required('Şifre zorunludur').min(6, 'Şifre en az 6 karakter olmalıdır'),
 });
 
@@ -107,7 +107,13 @@ const SignUp = memo(() => {
               label={'Firma Adı'}
               placeholder={'Firma adını girin'}
               style={styles.input}
-              onChangeText={handleChange('firmaName')}
+              onChangeText={(text) => {
+                const formattedText = text
+                  .split(' ')
+                  .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                  .join(' ');
+                handleChange('firmaName')(formattedText);
+              }}
               onBlur={handleBlur('firmaName')}
               value={values.firmaName}
               status={touched.firmaName && errors.firmaName ? 'danger' : 'basic'}
@@ -148,6 +154,7 @@ const SignUp = memo(() => {
                 onChangeText={handleChange('firmaTelefon')}
                 onBlur={handleBlur('firmaTelefon')}
                 value={values.firmaTelefon}
+                keyboardType='numeric'
                 style={{width:"80%"}}
                 status={touched.firmaTelefon && errors.firmaTelefon ? 'danger' : 'basic'}
                 caption={touched.firmaTelefon && errors.firmaTelefon ? errors.firmaTelefon : ''}

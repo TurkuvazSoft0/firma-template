@@ -1,6 +1,7 @@
 import * as React from 'react';
-import {ActivityIndicator, Alert,  FlatList, Linking, TouchableOpacity, View} from 'react-native';
-// ----------------------------- UI kitten -----------------------------------
+import {ActivityIndicator, Alert,  FlatList, Linking, Modal,  TouchableOpacity, View,Share} from 'react-native';
+// ----------------------------- UI kitten ----impo-------------------------------
+import tw from 'twrnc';
 import {
   TopNavigation,
   StyleService,
@@ -8,7 +9,10 @@ import {
     Input, 
 Button,
 Icon,
-IconElement
+IconElement,
+IndexPath,
+Select,
+SelectItem
 
 } from '@ui-kitten/components';
 // ----------------------------- Components && Elements -----------------------
@@ -19,7 +23,7 @@ import {
   CustomLayout,
   NavigationAction,
   Text,
-
+ 
 } from 'components';
 import DoctorItem from 'elements/DoctorItem';
 import ListEmptyDoctor from './ListEmptyDoctor';
@@ -29,14 +33,14 @@ import keyExtractoUtil from 'utils/keyExtractorUtil';
 import EvaIcons from 'types/eva-icon-enum';
 import {Modalize, useModalize} from 'react-native-modalize';
 import {useLayout} from 'hooks';
-import {NavigationProp, useNavigation, useTheme} from '@react-navigation/native';
+import {Link, NavigationProp, useNavigation, useTheme} from '@react-navigation/native';
 import {MainStackParamList} from 'types/navigation-types';
 // ----------------------------- Assets ---------------------------------------
 import {DOCTORS_DATA} from 'constants/data';
 import { IDoctorProps } from 'types/element-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { useAppDispatch } from 'reduxs/store';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { AppDispatch, RootState } from "reduxs/store";
 import { fetchSirketler } from 'reduxs/reducers/SirketlerSlice';
 import { stat } from 'fs';
@@ -50,8 +54,21 @@ import { resetStatusType } from 'reduxs/reducers/UserRegister';
 const SearchScreen = React.memo(() => {
   const [isModalVisible, setModalVisible] = React.useState(false);
   const styles = useStyleSheet(themedStyles);
+  const icerikInputRef = useRef(null);
+
   const {top} = useLayout();
   const [mailList, setMailList] = React.useState<string[] | any>([]);
+  const [mailList2, setMailList2] = React.useState<string[] | any>([]);
+  const [nameList, setNameList] = React.useState<string[] | null>([]);
+  useEffect(() => {
+    console.log(mailList2,"mail listesi2");
+  },[setMailList2]);
+  console.log(nameList,"name listesi",mailList,"mail listesi");
+  useEffect(() => 
+    {
+      console.log(nameList,"name  List");
+    },[nameList]);
+  console.log(mailList,"mail listesi");
   useEffect(() => 
     { 
       console.log(mailList,"mail listverf");
@@ -71,14 +88,14 @@ const SearchScreen = React.memo(() => {
   const status = useSelector((state:RootState) => state.sirketler.status);
   const mail_lists  = useSelector((state: RootState) => state.teklif.mails_array);
   const mail  = useSelector((state: RootState) => state.teklif.mails);
-  
+
 
 
   
   const user_mail  = useSelector((state: RootState) => state.register.email);
 
-  const [baslik, setBaslik] = React.useState<string | undefined>(undefined);
-  const [icerik, setİcerik] = React.useState<string | undefined>(undefined);
+  const [baslik, setBaslik] = React.useState<string | undefined>();
+  const [icerik, setİcerik] = React.useState<string | undefined>();
 
 
   interface MailInfo {
@@ -126,10 +143,24 @@ const SearchScreen = React.memo(() => {
   const modalizeRef2 = React.useRef<Modalize>(null);
   // İlk modalı açma fonksiyonu
  
- // Mail gönderme fonksiyonu
- const handleMailPress = (mail : string) => {
-  Linking.openURL(`mailto:${mail}`);
-};
+
+  const handleSelect = (index: IndexPath) => {
+  };
+  const handleMailPress = (mail: string, baslik: string, icerik: string) => {
+    const subject = encodeURIComponent(baslik || "");
+    const body = encodeURIComponent(icerik || "");
+    const mailAddresses = mail;
+  
+    const mailtoURL = `mailto:${mailAddresses}?subject=${subject}&body=${body}`;
+  
+    Share.share({
+      message: `Subject: ${baslik}\n\n${icerik}`,
+      url: mailtoURL,
+    }).catch(err => console.error("An error occurred", err));
+  };
+  
+// Örnek kullanım
+
 
 // Telefon arama fonksiyonu
 const handlePhonePress = (phone : number) => {
@@ -196,7 +227,7 @@ const renderItem = ({ item }: { item: Sirket }) => (
   <View style={styles.itemContainer}>
     {/* Şirket Mail */}
     {item.sirket_mail.map((mailItem, index) => (
-      <TouchableOpacity key={index} style={styles.row} onPress={() => handleMailPress(mailItem.mail)}>
+      <TouchableOpacity key={index} style={styles.row} onPress={() => handleMailPress(mailItem.mail, "dwed", "wdwed")}>
         <AppIcon name={EvaIcons.EmailOutline} size={24}  />
         <Text style={styles.text}>{mailItem.mail}</Text>
       </TouchableOpacity>
@@ -313,15 +344,14 @@ const handleSubmit = () => {
   formData.append('mail_adresi', user_mail);
 
   // Sadece mail adreslerini içeren bir dizi oluşturma
-  const mailAddresses = mailList?.map((item : any) => item?.mail);
-  
+ 
   // mailAddresses'i JSON formatına dönüştürerek formData'ya ekleme
-  formData.append('mails', JSON.stringify(mailAddresses));
+  formData.append('mails', JSON.stringify(mailList2));
 
   // Veriyi dispatch ile gönderme
   console.log(formData, "FormData içeriği:");
   dispatch(AddBulkMail(formData));
-  Alert.alert("Bilgi", "Mail Gönderim İşlemi Başarılı");
+  Alert.alert("Bilgi", "Teklif Gönderme İşlemi Başarılı");
 };
 
 const onClose = () => 
@@ -337,6 +367,10 @@ const onOpen =  () =>
   openModal2();
   setSearchValue("");
   };
+  const [selectedIndex, setSelectedIndex] = React.useState<IndexPath | IndexPath[]>(new IndexPath(0));
+
+  const selectItem = ["Uygulama Üzerinden Mail Gönder","Mail Üzerinden Gönder "]
+  
   const ListHeaderComponent = () => {
     return (
       <CustomLayout level="3" mt={16}>
@@ -391,6 +425,8 @@ const onOpen =  () =>
              </>
           )}
         />
+
+
         <Input
           accessoryLeft={props => (
             <AppIcon
@@ -425,18 +461,39 @@ const onOpen =  () =>
                 setSirketId(index);   
               }}>
                
-                <DoctorItem setMailList={setMailList} searchValue={searchValue } onOpen={onOpen} data={item} />
+                <DoctorItem 
+                  nameList={nameList || []} 
+                  setNameList={setNameList} 
+                  setMailList2={setMailList2}
+                  mailList2={mailList2}
+                  setMailList={setMailList} 
+                  mailList={mailList} 
+                  mail={item.sirket_veriler.sirket_mail[0].mail}
+                  searchValue={searchValue} 
+                  onOpen={onOpen} 
+                  data={item} 
+                />
                 
             
             {
               isLastItem && 
                   <Button 
                     size='tiny'
-                    status='success'
+                    status={nameList?.length > 0 ? "success" : "danger"}
                     style={{marginTop:20,borderRadius:100}}
                     onPress={() => {
+             
+             
                       // Teklif al işlemini burada gerçekleştirin
-                open();
+                      if(nameList?.length > 0 ) 
+                      {
+                        setModalVisible(true);
+
+                      }
+                      else 
+                      {
+                        Alert.alert("Lütfen Mail Adresi Seçiniz")
+                      }
                 
                     }} 
                   >
@@ -450,47 +507,115 @@ const onOpen =  () =>
         />
   
 
-  <Modalize
-  ref={ref}
-  scrollViewProps={{ showsVerticalScrollIndicator: false }}
-  handlePosition="inside"
-  
-  modalHeight={height / 2}
-  modalStyle={{ borderRadius: 40, marginHorizontal: 10, backgroundColor: "white" }}
+  <Modal
+  visible={isModalVisible}
+  transparent={true}
+  animationType="slide"
+  onRequestClose={() => setModalVisible(false)}
 >
-  <CustomLayout level="3" mt={20} ph={34} style={{ height: '100%', paddingBottom: 20 }}>
-    <Text category="t4" style={{ marginHorizontal: 1, textAlign: 'center', marginBottom: 20,paddingTop:20 }}>
-      Teklif Al
-    </Text>
-    <Input
-      onChangeText={(value) => setBaslik(value)}
-      style={{ color:"black",backgroundColor: "black", marginBottom: 20 }}
-      placeholder='Teklif Başlığı'
+  <View style={styles.centeredView}>
+    <View style={styles.modalView}>
+      <TouchableOpacity
+        style={styles.closeButton}
+        onPress={() => setModalVisible(false)}
+      >
+        <Text style={styles.closeButtonText}>X</Text>
+      </TouchableOpacity>
 
-      accessoryLeft={props => (
-        <AppIcon
-          name={EvaIcons.MessageCircleOutline}
-          //@ts-ignore
-          size={props?.style.width}
-          //@ts-ignore
-          fill={props?.style.tintColor}
-        />
-      )}
-    />
-    
-   
-    <Input
-      onChangeText={(value) => setİcerik(value)}
-      textStyle={{height:"100%",minHeight:"100%"}}
-      style={{ backgroundColor: "black", height: 120,marginBottom:40 }} // Yüksekliği küçülttük
-      placeholder='Teklif İçeriği'
-    />
-    
-<Button status='primary'  onPress={() => handleSubmit()}>
-  Teklif Al
-</Button>
-  </CustomLayout>
-</Modalize>
+      <Text category="t5" style={{ marginHorizontal: 1, textAlign: 'center', marginBottom: 20, paddingTop: 20 }}>
+        Teklif Al
+      </Text>
+
+      <View style={{ marginBottom: 20 }}>
+        <Text category="label" style={{ textAlign: 'center', marginBottom: 10 }}>
+          Mail Gönderilecek Firmalar
+        </Text>
+        {nameList && nameList.map((name, index) => (
+          <Text key={index} style={{ textAlign: 'center', color: 'gray', marginBottom: 5 }}>
+            {name}
+          </Text>
+        ))}
+      </View>
+      {
+        baslik && icerik ? null : <Text style={tw`text-right ml-auto flex justify-end my-4 text-xs font-bold  text-red-600  `}>Lütfen Teklif Başlığı ve İçeriği Giriniz</Text>
+      }
+
+      <Select
+        style={{ marginBottom: 10, width: "100%" }}
+        selectedIndex={selectedIndex}
+        onSelect={async() => {
+          if (mailList2.length === 0) {
+            Alert.alert("Uyarı", "Lütfen en az bir mail adresi seçiniz.");
+            return;
+          }
+
+          const subject = encodeURIComponent(baslik || ""); // Mail başlığı
+          const body = encodeURIComponent(icerik || ""); // Mail içeriği
+
+          const mailAddresses = mailList2.join(',');
+
+          const mailtoURL = `mailto:${mailAddresses}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+          try {
+            const supported = await Linking.canOpenURL(mailtoURL);
+            if (supported) {
+              await Linking.openURL(mailtoURL);
+              console.log('Mail uygulaması açıldı');
+            } else {
+              Alert.alert('Hata', 'Mail uygulaması açılamıyor');
+              console.error('Mail uygulaması açılamıyor');
+            }
+          } catch (error) {
+            Alert.alert('Hata', 'Mail açılırken bir hata oluştu');
+            console.error('Mail açılırken hata:', error);
+          }
+        }}
+        value={
+          selectedIndex !== null
+            ? selectedIndex.row === 0
+              ? 'Uygulama Üzerinden Gönder'
+              : 'Kendi Mail Adresin Üzerinden Gönder'
+            : 'Gönderim Yöntemi Seçin'
+        }
+      >
+        <SelectItem  disabled title="Uygulama Üzerinden Gönder" />
+         <SelectItem disabled={baslik && icerik ? false : true} style={tw`${baslik && icerik ? "opacity-100" : "opacity-30"}`} title="Kendi Mail Adresin Üzerinden Gönder" /> 
+      </Select>
+
+      <Input
+        onChangeText={(value) => setBaslik(value)}
+        style={{ color: "black", backgroundColor: "black", marginBottom: 20 }}
+        placeholder='Teklif Başlığı'
+        textStyle={{ color: "white", height: 20,fontSize:14 }}
+        returnKeyType="next"
+        onSubmitEditing={() => icerikInputRef.current?.focus()}
+        accessoryLeft={props => (
+          <AppIcon
+            name={EvaIcons.MessageCircleOutline}
+            //@ts-ignore
+            size={props?.style.width}
+            //@ts-ignore
+            fill={props?.style.tintColor}
+          />
+        )}
+      />
+
+      <Input
+        ref={icerikInputRef}
+        onChangeText={(value) => setİcerik(value)}
+        textStyle={{ color: "white", height: 120,fontSize:14 }}
+        style={{ backgroundColor: "black", marginBottom: 40 }}
+        placeholder='Teklif İçeriği'
+        placeholderTextColor="gray"
+        returnKeyType="done"
+      />
+
+      <Button status='primary' onPress={() => handleSubmit()}>
+        Teklif Al
+      </Button>
+    </View>
+  </View>
+</Modal>
 
 
     </Container>
@@ -560,8 +685,36 @@ const themedStyles = StyleService.create({
     marginLeft: 10,
     fontSize: 16,
   },
-
-
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalView: {
+    width: '90%',
+    backgroundColor: 'background-basic-color-3',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+  },
+  closeButtonText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
 });
 
 export const OPTIONS = [

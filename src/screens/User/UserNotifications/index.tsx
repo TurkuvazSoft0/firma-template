@@ -8,7 +8,7 @@ import {
 } from '@ui-kitten/components';
 // ----------------------------- Components && Elements -----------------------
 import {Container, NavigationAction} from 'components';
-import NotificationItem, {INotificationItemProps} from './NotificationItem';
+import NotificationItem, {INotificationItemProps} from './UserNotificationsItem';
 // ----------------------------- Ultils ---------------------------------------
 import keyExtractoUtil from 'utils/keyExtractorUtil';
 
@@ -16,20 +16,20 @@ import keyExtractoUtil from 'utils/keyExtractorUtil';
 import EvaIcons from 'types/eva-icon-enum';
 import { AppDispatch, RootState } from "reduxs/store";
 import { useDispatch,useSelector } from 'react-redux';
-import { GetFullMail, SetMailUpdate } from 'reduxs/reducers/teklifSlice';
-import { useStatusControl } from 'hooks/useStatus';
-const NotificationScreen = React.memo(() => {
+import { GetFullMail, GetMailUsers, SetMailUpdate } from 'reduxs/reducers/teklifSlice';
+import UserNotificationsItem from './UserNotificationsItem';
+const UserNotificationScreen = React.memo(() => {
   const styles = useStyleSheet(themedStyles);
   const dispatch = useDispatch<AppDispatch>();
   const mail  = useSelector((state: RootState) => state.register.email);
-  const status  = useStatusControl();
-  const mail_list = useSelector((state:RootState) => state.teklif.maillist);
+  const mail_icerik  = useSelector((state: RootState) => state.teklif.musterimaileri);
+  console.log(mail_icerik,"mail iceriği");
   useEffect(() => {
     const formData = new FormData();
-    formData.append("mail", mail);
+    formData.append("mail_adresi", mail);
 
     const fetchData = () => {
-      dispatch(GetFullMail(formData));
+      dispatch(GetMailUsers(formData));
     };
 
     fetchData(); // İlk veri çekme işlemi
@@ -38,8 +38,6 @@ const NotificationScreen = React.memo(() => {
 
     return () => clearInterval(intervalId); // Bileşen unmount olduğunda interval'i temizle
   }, [mail, dispatch]);
-    
-   
     const handleSubmit = (durum : any, id : number) => {
       const forms = new FormData();
       forms.append("mail_id", id);
@@ -61,21 +59,21 @@ const NotificationScreen = React.memo(() => {
     index: number;
   }) => {
     return (
-      <NotificationItem status={status} onPress={handleSubmit} mail_id={item.mail_id} data={item} lastItem={index === DATA.length - 1} />
+      <UserNotificationsItem onPress={handleSubmit} mail_id={item.mail_id} data={item} lastItem={index === DATA.length - 1} />
     );
   };
 
   return (
     <Container style={styles.container} level="1">
       <TopNavigation
-        title="Bildirimler"
+        title="Kullanıcı Bildirimleri"
         accessoryLeft={() => <NavigationAction marginRight={12} />}
         accessoryRight={() => (
           <NavigationAction icon={EvaIcons.MoreHorizontal} />
         )}
       />
       <FlatList
-        data={mail_list}
+        data={mail_icerik}
         renderItem={renderItem}
         keyExtractor={keyExtractoUtil}
         contentContainerStyle={styles.contentContainerStyle}
@@ -84,7 +82,7 @@ const NotificationScreen = React.memo(() => {
   );
 });
 
-export default NotificationScreen;
+export default UserNotificationScreen;
 
 const themedStyles = StyleService.create({
   container: {
@@ -94,6 +92,9 @@ const themedStyles = StyleService.create({
   contentContainerStyle: {
     paddingTop: 24,
     paddingBottom: 80,
+  },
+  text: {
+    color: '#FFFFFF',
   },
 });
 

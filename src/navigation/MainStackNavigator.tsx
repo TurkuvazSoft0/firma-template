@@ -29,11 +29,14 @@ import SecurityScreen from 'screens/User/Security';
 import LanguageScreen from 'screens/User/Language';
 import HelpCenter from 'screens/User/HelpCenter';
 import InviteFriends from 'screens/User/InviteFriend';
+
 // --------------------------------  Navigation ----------------------------------------
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Icon } from '@ui-kitten/components';
 import CompanyScreen from 'screens/User/SirketEkle';
 import { useStatusControl } from 'hooks/useStatus';
+import UserNotificationScreen from 'screens/User/UserNotifications';
+import GeneralPage from 'screens/User/GeneralComp';
 
 const Stack = createStackNavigator<MainStackParamList>();
 const Tab = createBottomTabNavigator();
@@ -57,14 +60,19 @@ function TabNavigator() {
             iconName = focused ? 'search' : 'search-outline';
           } else if (route.name === 'Profil') {
             iconName = focused ? 'person' : 'person-outline';
-          } else if (route.name === 'Bildirimler') {
+          } else if (route.name === 'Bildirim İşlemleri' ) {
             iconName = focused ? 'bell' : 'bell-outline';
-          } else if (route.name === 'Profil') {
+          }
+          else if (route.name === 'Teklifler' && user_control == "musteri") {
+            iconName = focused ? 'file-text' : 'file-text-outline';
+          }
+          else if (route.name === 'Profil') {
             iconName = focused ? 'message-circle' : 'message-circle-outline';
           }
           else if (route.name === 'Şirket Ekle' && user_control == "firma") {
             iconName = focused ? 'plus-circle' : 'plus-circle-outline';
           }
+         
 
           return <TabIcon name={iconName} color={color} size={size} />;
         },
@@ -75,15 +83,17 @@ function TabNavigator() {
     >
 
       <Tab.Screen name="Şirket Ara" component={SearchScreen} />
-      <Tab.Screen name="Bildirimler" component={NotificationScreen} />
-
+   
+     {
+    
+      <Tab.Screen name="Bildirim İşlemleri" component={GeneralPage} />
+}
       {
         user_control == "firma" &&
       <Tab.Screen name="Şirket Ekle" component={CompanyScreen} />
       }
       <Tab.Screen name="Profil" component={EditProfile} />
-
- 
+      
     </Tab.Navigator>
   );
 }
@@ -116,14 +126,16 @@ export function MainStackNavigator() {
       <Stack.Screen name="ArticlesScreen" component={ArticlesScreen} />
       <Stack.Screen name="ArticlesBookmark" component={ArticlesBookmark} />
       <Stack.Screen name="ArticlesDetails" component={ArticlesDetails} />
-
+      <Stack.Screen name="Bildirim İşlemleri" component={GeneralPage} />
       {/* Appointments */}
       <Stack.Screen name="CancelAppoiment" component={CancelAppoiment} />
       <Stack.Screen name="AppointmentDetails" component={AppointmentDetails} />
       <Stack.Screen name="RescheduleAppointment" component={RescheduleAppointment} />
 
       {/* Notifications */}
+      
       <Stack.Screen name="Bildirimler" component={NotificationScreen} />
+      <Stack.Screen name="Teklifler" component={UserNotificationScreen} />
 
       {/* User Settings */}
       <Stack.Screen name="SecurityScreen" component={SecurityScreen} />

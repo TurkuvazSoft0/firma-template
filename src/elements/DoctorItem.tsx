@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TouchableOpacity } from 'react-native';
+import { Alert, TouchableOpacity } from 'react-native';
 // ----------------------------- UI Kitten -----------------------------------
 import {
   StyleService,
@@ -12,37 +12,90 @@ import { CustomLayout, Text } from 'components';
 import GeneralModal from 'components/SearchScreens/Modals/GeneralModal';
 import { useLayout } from 'hooks';
 
-const f>DoctorItem = React.memo(({ data, onOpen,searchValue,setMailList }: { data: any,setMailList:any, onOpen: any,searchValue:any }) => {
+const DoctorItem = React.memo(({mailList, nameList,data,  searchValue, setMailList,setNameList,mailList2,setMailList2,mail }: {mail:string, mailList:any,setNameList:any,data: any, setMailList: any, onOpen: any, searchValue: any,nameList:any,mailList2:any,setMailList2:any}) => {
   const theme = useTheme();
   const { width } = useLayout();
   const styles = useStyleSheet(themedStyles);
   const [isModalVisible, setModalVisible] = React.useState(false);
-  const [selectedMail, setSelectedMail] = useState<any | null | object>(null);
+  const [selectedMail, setSelectedMail] = useState<any | null | object>(null);
+  const [selectedName, setSelectedName] = useState<any | null | object>(null);
+
   const handlePress = () => {
-    // Email bilgisini state'e kaydediyoruz
-    setSelectedMail(data.sirket_veriler?.sirket_mail);
-    setMailList((prevMailList: string[]) => [...prevMailList, ...(data.sirket_veriler?.sirket_mail || [])]);
-    
-    setModalVisible(true);
+    console.log(selectedMail, "selected mail");
+
+    if (selectedMail === mail) {
+      setSelectedMail(null);
+      setSelectedName(null);
+      setMailList2((prevList: any) => {
+        // mail'i listeden çıkar
+        const filteredList = prevList.filter((existingMail: string) => existingMail !== mail);
+        return filteredList;
+      });
+
+      console.log(mailList2, "mail listesi2");
+      setMailList((prevMailList: { mail: string; tag: string }[]) => {
+        const index = prevMailList.findIndex(mailObj => mailObj.mail === data.sirket_veriler?.sirket_mail);
+        if (index !== -1) {
+          const newMailList = [...prevMailList];
+          newMailList.splice(index, 1); // Belirtilen indeksi çıkar
+          return newMailList;
+        }
+        return prevMailList;
+      });
+      // İsim listeden çıkarılıyor
+      setNameList((prevNameList: string[]) =>
+        prevNameList.filter((name) => name !== data.sirket_ad)
+      );  
+    } else {
+      // Firma seçiliyor
+      setSelectedMail(mail);
+      setMailList2((prevList: any) => {
+        // mail'i eklemeden önce kontrol et
+        if (!prevList.includes(mail)) {
+          return [...prevList, mail];
+        }
+        return prevList;
+      });
+     
+      setSelectedName(data.sirket_ad);
+      setMailList((prevMailList: { mail: string; tag: string }[]) => [
+        ...prevMailList,
+        ...(data.sirket_veriler?.sirket_mail || []),
+      ]);
+      console.log(nameList, "name listesi");
+      // İsim listeye ekleniyor
+      setNameList((prevNameList: string[]) => [...prevNameList, data.sirket_ad]);
+      console.log(nameList, "name listesi");
+    }
+    console.log(mailList2, "mail listesi2");
+  };
+console.log(mailList2,"mail listesi2");
+  const modalPress = () => {
+    setModalVisible(true); // Modal açılıyor
+  };
+  const truncateText = (text: string, maxLength: number) => {
+    return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
   };
 
-
-
+  // İkonun rengi, seçilmiş olup olmamasına göre belirleniyor
+  const buttonColor =  mailList2.includes(mail) 
+    ? theme['color-success-default'] // Yeşil
+    : theme['color-basic-600']; // Gri
 
   return (
     <CustomLayout
       level="1"
-      onPress={onOpen}
+      onPress={modalPress}
       style={[
         styles.container,
-        // Eğer seçilen mail bu öğedeki mail ise yeşil renk, aksi takdirde normal renk
- searchValue &&   selectedMail === data.sirket_veriler?.sirket_mail
-          ? { backgroundColor: theme['color-success-default'] } // Yeşil renk
-          : { backgroundColor: theme['background-basic-color-1'] }, // Normal renk
+        searchValue && mailList2.includes(mail)
+          ? { backgroundColor: theme['color-success-default'] }
+          : { backgroundColor: theme['background-basic-color-1'] },
       ]}
       horizontal
       gap={12}
     >
+      {/* Modal */}
       <GeneralModal
         setModalVisible={setModalVisible}
         referanslar={data.sirketler_veriler?.referanslar}
@@ -61,20 +114,27 @@ const f>DoctorItem = React.memo(({ data, onOpen,searchValue,setMailList }: { dat
         pinterest={data.sirket_veriler?.pinterest}
       />
 
-      <CustomLayout style={{ flex: 1 }} onPress={handlePress}>
-        <CustomLayout horizontal justify="space-between">
-          <Text numberOfLines={1} maxWidth={300 * (width / 375)}>
-            {data.sirket_ad}
-          </Text>
-        </CustomLayout>
+      <CustomLayout style={{ flex: 1 }} horizontal justify="space-between">
+      <Text numberOfLines={1} style={{ maxWidth: 300 * (width / 375) }}>
+          {truncateText(data.sirket_ad, 25)}
+        </Text>
+        {/* İkonun rengi seçili duruma göre değişiyor */}
+        <TouchableOpacity
+          onPress={handlePress} // İkon tıklanınca handlePress çalışır
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: 16,
+            backgroundColor: buttonColor,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Text style={{ color: theme['color-basic-100'], fontWeight: 'bold' }}>✔</Text>
+        </TouchableOpacity>
       </CustomLayout>
     </CustomLayout>
   );
-
-
-
-
-  
 });
 
 export default DoctorItem;

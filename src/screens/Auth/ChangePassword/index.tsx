@@ -43,7 +43,12 @@ const ChangePassword = React.memo(() => {
     }
     useEffect(() => 
       { 
+        if(emailSend)
+        {
+
+        
 navigate("CreatePin");
+        }
       },[emailSend]);
   const styles = useStyleSheet(themedStyles);
   const {goBack} = useNavigation();
