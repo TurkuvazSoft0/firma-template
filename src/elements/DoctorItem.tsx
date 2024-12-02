@@ -22,8 +22,13 @@ const DoctorItem = React.memo(({mailList, nameList,data,  searchValue, setMailLi
 
   const handlePress = () => {
     console.log(selectedMail, "selected mail");
+if(!searchValue)
+{
+  Alert.alert("Lütfen Firma Arama İşlemi Yapınız");
+} 
 
-    if (selectedMail === mail) {
+
+   else if (selectedMail === mail) {
       setSelectedMail(null);
       setSelectedName(null);
       setMailList2((prevList: any) => {
@@ -46,7 +51,8 @@ const DoctorItem = React.memo(({mailList, nameList,data,  searchValue, setMailLi
       setNameList((prevNameList: string[]) =>
         prevNameList.filter((name) => name !== data.sirket_ad)
       );  
-    } else {
+    } 
+    else {
       // Firma seçiliyor
       setSelectedMail(mail);
       setMailList2((prevList: any) => {

@@ -147,8 +147,8 @@ const SearchScreen = React.memo(() => {
   const handleSelect = (index: IndexPath) => {
   };
   const handleMailPress = (mail: string, baslik: string, icerik: string) => {
-    const subject = encodeURIComponent(baslik || "");
-    const body = encodeURIComponent(icerik || "");
+    const subject = baslik || "";
+    const body = icerik || "";
     const mailAddresses = mail;
   
     const mailtoURL = `mailto:${mailAddresses}?subject=${subject}&body=${body}`;
@@ -352,6 +352,7 @@ const handleSubmit = () => {
   console.log(formData, "FormData içeriği:");
   dispatch(AddBulkMail(formData));
   Alert.alert("Bilgi", "Teklif Gönderme İşlemi Başarılı");
+  setModalVisible(false);
 };
 
 const onClose = () => 
@@ -549,8 +550,8 @@ const onOpen =  () =>
             return;
           }
 
-          const subject = encodeURIComponent(baslik || ""); // Mail başlığı
-          const body = encodeURIComponent(icerik || ""); // Mail içeriği
+          const subject = baslik || "";
+          const body = icerik || "";
 
           const mailAddresses = mailList2.join(',');
 
