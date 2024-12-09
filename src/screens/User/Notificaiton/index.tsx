@@ -45,6 +45,7 @@ const NotificationScreen = React.memo(() => {
       forms.append("mail_id", id);
       forms.append("mail_durum", durum);
 
+
       dispatch(SetMailUpdate(forms)).then(() => {
         Alert.alert("Güncelleme İşlemi Basarılı");
           const formData = new FormData();

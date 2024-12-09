@@ -1,5 +1,5 @@
-import React, { memo, useEffect } from 'react';
-import { Image } from 'react-native';
+import React, { memo, useEffect, useState } from 'react';
+import { Alert, Image } from 'react-native';
 import { Formik } from 'formik';
 import { Input, Button, StyleService, useStyleSheet, TopNavigation } from '@ui-kitten/components';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
@@ -14,6 +14,8 @@ import { useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from "reduxs/store";
 import { firmaUserControl } from 'reduxs/reducers/UserRegister';
 import { useStatusControl } from 'hooks/useStatus';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 
 type FormikForm = {
   account: string;
@@ -21,35 +23,18 @@ type FormikForm = {
   password: string;
 };
 
-const Login = memo(() => {
-
-const user_control = useStatusControl();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-useEffect(() => 
-  {
-    if(user_control == "firma" || user_control == "musteri")
-navigation.navigate("MainStack");
-  },[user_control]);
+const Login = memo(() => { 
+  const [token, setToken] = useState<string | null>(null);
+  const user_control = useStatusControl();
 
   const dispatch = useDispatch<AppDispatch>();
-
   const { navigate } = useNavigation<NavigationProp<AuthStackParamList>>();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const styles = useStyleSheet(themedStyles);
   const { width } = useLayout();
+
+
+
 
   const initValues: FormikForm = {
     account: ''.toLocaleLowerCase(),
@@ -66,23 +51,39 @@ navigation.navigate("MainStack");
     }
   // Email doğrulama için düzenli ifade.
   const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,})+$/;
-  const formData = new FormData();
 
   // Backend'e gönderilecek form verileri
   const handleLogin = async (values: FormikForm) => {
+  const formData = new FormData();
+  const token = await SecureStore.getItemAsync('userToken');
+  
+
     formData.append("mail", values.account);
     formData.append("status","firma");
     formData.append("password", values.password);
-    console.log(formData,"wefwe")
-    console.log(formData);
+ 
     dispatch(firmaUserControl(formData));
-  if(user_control)
-  {
-    navigation.navigate("MainStack");
-  }
-  };
-
+    if(token) 
+      {
+        navigation.navigate("MainStack");
+      }
+    };
+    useEffect(() => {
+      const checkToken = async () => {
+        try {
+          const storedToken = await SecureStore.getItemAsync('userToken');
+          setToken(storedToken);
+          if (storedToken) {
+            console.log(storedToken, "token değeri");
+            navigate("MainStack");
+          }
+        } catch (error) {
+          console.error("Token kontrol hatası:", error);
+        }
+      };
   
+      checkToken();
+    }, [navigate, dispatch,handleLogin,token]);
   return (
     <Formik
       initialValues={initValues}

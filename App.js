@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, AppState } from 'react-native';
+import React from 'react';
+import { StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { IconRegistry } from '@ui-kitten/components';
@@ -9,26 +9,10 @@ import AssetsIconsPack from 'assets/AssetsIconsPack';
 import { Provider } from 'react-redux';
 import store, { persistor } from 'reduxs/store';
 import { PersistGate } from 'redux-persist/integration/react';
-import * as SecureStore from 'expo-secure-store';
-
 export default function App() {
- 
-  useEffect(() => {
-    const handleAppStateChange = async (nextAppState) => {
-      if (nextAppState === 'background' || nextAppState === 'inactive') {
-        // Uygulama arka plana geçtiğinde veya kapandığında token'ı sil
-        await SecureStore.deleteItemAsync('userToken');
-        console.log('Token silindi');
-      }
-    };
+    const state = store.getState().register.token;
 
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
-
-    return () => {
-      subscription.remove();
-    };
-  }, []);
-
+    console.log(state,"state token");
 
   return (
     <Provider store={store}>
@@ -60,4 +44,4 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
   },
-});
+}); 

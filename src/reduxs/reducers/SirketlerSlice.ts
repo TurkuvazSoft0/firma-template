@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { Alert } from 'react-native';
 import axios from 'react-native-axios';
+import axiosInstance from '../axiosIstance/index';
 
 
 
@@ -44,10 +45,11 @@ export const fetchSirketler = createAsyncThunk(
   'sirketapi/fetchSirketler',
   async () => {
     
-    const response = await axios.get<Sirket[]>('https://mobileapp.turkuvazprojeler.com/veri-al.php');
+    const response = await axiosInstance.get('/companies/company-get');
     return response.data;
   }
 );
+
 
 export const fetchSirketEkle = createAsyncThunk(
   'sirketapi/fetchSirketEkle',
@@ -102,14 +104,18 @@ export const SirketlerSlice = createSlice({
     builder
       .addCase(fetchSirketler.pending, (state: ISirketlerState) => {
         state.status = 'loading';
+
       })
       .addCase(fetchSirketler.fulfilled, (state: ISirketlerState, action: PayloadAction<any[]>) => {
         state.status = 'succeeded';
         state.sirketler = action.payload;
+        console.log(action.payload,"action.payload sirket");
       })
-      .addCase(fetchSirketler.rejected, (state: ISirketlerState, action: any) => {
+      .addCase(fetchSirketler.rejected, (state: ISirketlerState, action: PayloadAction<any[]>) => {
         state.status = 'failed';
         state.error = action.error.message;
+        console.log(action.payload,"action.payload sirket");
+
       })
       .addCase(fetchSirketEkle.fulfilled, (state: ISirketlerState, action: PayloadAction<any>) => {
         Alert.alert(action.payload);

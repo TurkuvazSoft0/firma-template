@@ -6,7 +6,6 @@ import SirketlerSlice, { initialSirketlerState } from './SirketlerSlice';
 import UserRegister, { initialUserRegisterState } from './UserRegister'; // UserRegister initial state import
 import mailSlice,{initialMailState} from './teklifSlice';
 import passwordResetSlice,{initialForgetPasswordState} from './forgetPassword';
-
 // Reducer'ları birleştirerek rootReducer oluşturun
 export const rootReducer = combineReducers({
   app: app,
@@ -27,7 +26,7 @@ const initialState: RootState = {
   sirketler: initialSirketlerState,
   register: initialUserRegisterState, // UserRegister başlangıç durumunu ekleyin
   teklif:initialMailState,
-  passwordReset:initialForgetPasswordState
+  passwordReset:initialForgetPasswordState, //forgetPasswordState
 };
 
 // `CLEAR_PERSIST_DATA` durumunda tüm verileri sıfırlama işlemi

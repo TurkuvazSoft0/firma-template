@@ -2,6 +2,8 @@ import * as React from 'react';
 import {ActivityIndicator, Alert,  FlatList, Linking, Modal,  TouchableOpacity, View,Share} from 'react-native';
 // ----------------------------- UI kitten ----impo-------------------------------
 import tw from 'twrnc';
+import * as SecureStore from 'expo-secure-store';
+
 import {
   TopNavigation,
   StyleService,
@@ -51,27 +53,31 @@ import { AddBulkMail, setMailArray } from 'reduxs/reducers/teklifSlice';
 import GeneralModal from "../../../components/SearchScreens/Modals/GeneralModal"
 import { resetPasswordState } from 'reduxs/reducers/forgetPassword';
 import { resetStatusType } from 'reduxs/reducers/UserRegister';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import store from '../../../reduxs/store';
+import getDecodedToken from '../../../hooks/useGetDecodedToken';
+import CompanyApplicationModal from '../../../components/SearchScreens/Modals/CompanyApplicationModal';
 const SearchScreen = React.memo(() => {
+  const decodedToken = getDecodedToken();
+  console.log(decodedToken,"Decoded Token");
   const [isModalVisible, setModalVisible] = React.useState(false);
+  const [token, setToken] = React.useState<string | null>(null);
+  const [tokenRemoved, setTokenRemoved] = React.useState(false);
   const styles = useStyleSheet(themedStyles);
   const icerikInputRef = useRef(null);
-
   const {top} = useLayout();
   const [mailList, setMailList] = React.useState<string[] | any>([]);
   const [mailList2, setMailList2] = React.useState<string[] | any>([]);
   const [nameList, setNameList] = React.useState<string[] | null>([]);
+  const bilgiler = store.getState();
+  console.log(bilgiler,"Store İçindeki Bilgiler");
   useEffect(() => {
-    console.log(mailList2,"mail listesi2");
   },[setMailList2]);
-  console.log(nameList,"name listesi",mailList,"mail listesi");
   useEffect(() => 
     {
-      console.log(nameList,"name  List");
     },[nameList]);
-  console.log(mailList,"mail listesi");
   useEffect(() => 
     { 
-      console.log(mailList,"mail listverf");
     },[mailList]);
   const { navigate } = useNavigation<NavigationProp<AuthStackParamList>>();
   
@@ -82,7 +88,7 @@ const SearchScreen = React.memo(() => {
   const YandexIcon = (props) => (
     <Icon name='globe-outline' pack='eva' {...props} /> // Yandex ikonu için uygun bir simge (örn. globe)
   );
-  
+  const [isCompanyApplicationModalVisible, setCompanyApplicationModalVisible] = React.useState(false);
   const [sirketId, setSirketId] = React.useState<number>(0);
   const sirketler  = useSelector((state: RootState) => state.sirketler.sirketler);
   const status = useSelector((state:RootState) => state.sirketler.status);
@@ -131,11 +137,46 @@ const SearchScreen = React.memo(() => {
   }
   const dispatch = useDispatch<AppDispatch>();
   // Component mount olduğunda veriyi çekiyoruz
+ 
   useEffect(() => {
-    dispatch(fetchSirketler());
-  }, [dispatch]);
+    const fetchToken = async () => {
+      try {
+        const storedToken = await SecureStore.getItemAsync("userToken");
+        setToken(storedToken);
+      } catch (error) {
+        console.error("Token alma hatası:", error);
+      }
+    };
 
-  
+    fetchToken();
+  }, []); // Bu useEffect sadece component mount olduğunda çalışır
+
+  // Burası Token Değiştiğinde çalışacak
+  useEffect(() => {
+    if (token) {
+      Alert.alert("Token", token.toString());
+      dispatch(fetchSirketler());
+    }
+  }, [token, dispatch]); // Token değiştiğinde veya dispatch değiştiğinde çalışır
+
+  useEffect(() => {
+    if (tokenRemoved) {
+      dispatch(fetchSirketler());
+      setTokenRemoved(false);
+    }
+  }, [tokenRemoved, dispatch]);
+
+  const handleLogout = async () => {
+    try {
+      await SecureStore.deleteItemAsync('userToken');
+      setToken(null);
+      setTokenRemoved(true);
+      navigate("Login");
+    } catch (error) {
+      console.error("Token kaldırma hatası:", error);
+    }
+  };
+
   const {height} = useLayout();
   const [active, setActive] = React.useState(0);
   const [searchValue, setSearchValue] = React.useState('');
@@ -313,7 +354,6 @@ interface Sirket {
 
 }
 
-
 const searchDoctor = React.useMemo(() => {
   if (!searchValue) return sirketler; // Arama yoksa tüm listeyi döndür
 
@@ -355,6 +395,8 @@ const handleSubmit = () => {
   setModalVisible(false);
 };
 
+const bilgi = useSelector((state: RootState) => state.register);
+console.log(bilgi,"bilgilerim");
 const onClose = () => 
   {
     setModalVisible(false);
@@ -410,15 +452,14 @@ const onOpen =  () =>
             <>  
             <NavigationAction
               icon={EvaIcons.LogOut}
-              onPress={() => {
-                dispatch(resetStatusType())
-                navigate("Login");
-              }}
+              onPress={handleLogout}
             />
-
-       
-
-
+            <Button size='tiny'  onPress={() => setCompanyApplicationModalVisible(true)} status='primary'>
+              Başvuru Yap
+              
+          </Button>
+            
+            
 
 
 
@@ -452,8 +493,6 @@ const onOpen =  () =>
           keyExtractor={keyExtractoUtil}
           
           renderItem={({ item, index }) => {
-            console.log(item.sirket_veriler.etiketler,"sirket veriler");
-            console.log(searchDoctor.length,"ledwed");
             const isLastItem = index === searchDoctor.length - 1; // Son item kontrolü
           
             return (
@@ -617,7 +656,7 @@ const onOpen =  () =>
     </View>
   </View>
 </Modal>
-
+<CompanyApplicationModal sirketler={sirketler} isModalVisible={isCompanyApplicationModalVisible} setModalVisible={setCompanyApplicationModalVisible} />
 
     </Container>
   );

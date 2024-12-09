@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { MainStackParamList } from 'types/navigation-types';
 import NotificationScreen from 'screens/User/Notificaiton';
@@ -37,7 +37,13 @@ import CompanyScreen from 'screens/User/SirketEkle';
 import { useStatusControl } from 'hooks/useStatus';
 import UserNotificationScreen from 'screens/User/UserNotifications';
 import GeneralPage from 'screens/User/GeneralComp';
-
+import { useDispatch, useSelector } from 'react-redux';
+import rootReducer from '../reduxs/reducers/rootReducer';
+import { RootState } from '../reduxs/store';
+import { Alert } from 'react-native';
+import { AppDispatch } from '../reduxs/store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 const Stack = createStackNavigator<MainStackParamList>();
 const Tab = createBottomTabNavigator();
 
@@ -48,7 +54,26 @@ const TabIcon = ({ name, color, size }: { name: string; color: string; size: num
 
 // TabNavigator: Alt gezinme çubuğunda gösterilecek ana ekranlar
 function TabNavigator() {
-  const user_control = useStatusControl();
+  const [role, setRole] = useState<string | null>(null);
+ useEffect(() => { 
+  const fetchRole = async () => {
+    try {
+      const storedRole = await SecureStore.getItemAsync('role');
+      if (storedRole !== null) {
+        setRole(storedRole);
+      }
+    } catch (error) {
+      console.error('Error fetching role from secure storage:', error);
+    }
+  };
+
+  fetchRole();
+}, []);
+
+
+  
+
+
 
   return (
     <Tab.Navigator
@@ -63,13 +88,13 @@ function TabNavigator() {
           } else if (route.name === 'Bildirim İşlemleri' ) {
             iconName = focused ? 'bell' : 'bell-outline';
           }
-          else if (route.name === 'Teklifler' && user_control == "musteri") {
+          else if (route.name === 'Teklifler' ) {
             iconName = focused ? 'file-text' : 'file-text-outline';
           }
           else if (route.name === 'Profil') {
             iconName = focused ? 'message-circle' : 'message-circle-outline';
           }
-          else if (route.name === 'Şirket Ekle' && user_control == "firma") {
+          else if (route.name === 'Şirket Ekle' && role == "firma") {
             iconName = focused ? 'plus-circle' : 'plus-circle-outline';
           }
          
@@ -89,7 +114,7 @@ function TabNavigator() {
       <Tab.Screen name="Bildirim İşlemleri" component={GeneralPage} />
 }
       {
-        user_control == "firma" &&
+        role == "firma" &&
       <Tab.Screen name="Şirket Ekle" component={CompanyScreen} />
       }
       <Tab.Screen name="Profil" component={EditProfile} />
@@ -100,6 +125,10 @@ function TabNavigator() {
 
 // MainStackNavigator: Diğer ekranlar ve TabNavigator
 export function MainStackNavigator() {
+
+
+
+
   return (
     <Stack.Navigator
       initialRouteName={'TabNavigator'} // Başlangıç noktası TabNavigator

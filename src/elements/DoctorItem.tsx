@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Alert, TouchableOpacity } from 'react-native';
+import { Alert,  TouchableOpacity, View } from 'react-native';
+import { Button, Icon } from '@ui-kitten/components';
 // ----------------------------- UI Kitten -----------------------------------
 import {
   StyleService,
@@ -11,7 +12,7 @@ import { CustomLayout, Text } from 'components';
 // ----------------------------- @Types ---------------------------------------
 import GeneralModal from 'components/SearchScreens/Modals/GeneralModal';
 import { useLayout } from 'hooks';
-
+import tw from "twrnc"
 const DoctorItem = React.memo(({mailList, nameList,data,  searchValue, setMailList,setNameList,mailList2,setMailList2,mail }: {mail:string, mailList:any,setNameList:any,data: any, setMailList: any, onOpen: any, searchValue: any,nameList:any,mailList2:any,setMailList2:any}) => {
   const theme = useTheme();
   const { width } = useLayout();
@@ -121,10 +122,11 @@ console.log(mailList2,"mail listesi2");
       />
 
       <CustomLayout style={{ flex: 1 }} horizontal justify="space-between">
-      <Text numberOfLines={1} style={{ maxWidth: 300 * (width / 375) }}>
+      <Text numberOfLines={1} style={{ maxWidth: 200 * (width / 335) }}>
           {truncateText(data.sirket_ad, 25)}
         </Text>
         {/* İkonun rengi seçili duruma göre değişiyor */}
+        <View style={tw`flex-row gap-2`}> 
         <TouchableOpacity
           onPress={handlePress} // İkon tıklanınca handlePress çalışır
           style={{
@@ -138,6 +140,23 @@ console.log(mailList2,"mail listesi2");
         >
           <Text style={{ color: theme['color-basic-100'], fontWeight: 'bold' }}>✔</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+  style={{
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "green",
+    justifyContent: 'center',
+    alignItems: 'center',
+  }}
+>
+  <Icon
+    name='eye'
+    fill={theme['color-basic-100']}
+    style={{ width: 24, height: 24 }}
+  />
+</TouchableOpacity>
+</View>
       </CustomLayout>
     </CustomLayout>
   );

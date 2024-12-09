@@ -1,14 +1,17 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'react-native-axios';
 import { Alert } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
 import { navigate } from 'navigation/root-navigation';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { AuthStackParamList, MainStackParamList, RootStackParamList } from 'types/navigation-types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Kullanıcı durumu için arayüz tanımı
 interface IRegisterState {
   user: string | null;
   loading: boolean;
+  token: string | null | any;
   id: boolean | number;
   error: string | null;
   status_type: string | boolean;
@@ -24,6 +27,7 @@ interface IRegisterState {
 export const initialUserRegisterState: IRegisterState = {
   user: null,
   loading: false,
+  token: null,
   id: false,
   error: null,
   status_type: false,
@@ -34,7 +38,7 @@ export const initialUserRegisterState: IRegisterState = {
   firma_vergidairesi: false,
   firma_verginumarasi: false,
 };
-
+const apiUrl = "http://192.168.1.44:3000"
 // Kullanıcı kayıt asenkron thunk
 export const registerUser = createAsyncThunk(
   'user/register',
@@ -46,7 +50,7 @@ export const registerUser = createAsyncThunk(
       }
 
       const response = await axios.post(
-        'https://mobileapp.turkuvazprojeler.com/kullanici-kayit-ekle.php',
+        `${apiUrl}/auth/register`,
         params,
         {
           headers: {
@@ -68,37 +72,38 @@ export const registerUser = createAsyncThunk(
 
 // Firma kullanıcı login kontrol asenkron thunk
 export const firmaUserControl = createAsyncThunk(
-    'user/firmalogincontrol',
-    async (formData: FormData, { rejectWithValue }) => {
-      try {
-        const response = await axios.post(
-          'https://mobileapp.turkuvazprojeler.com/login-control-firma.php',
-          formData,  // FormData'yı doğrudan gönderiyoruz
-          {
-            headers: {
-            'Content-Type': 'multipart/form-data'
-            },
-          }
-        );
-  
-        if (response.status !== 200) {
-          return rejectWithValue(response.data);
+  'user/firmalogincontrol',
+  async (formData: FormData, { rejectWithValue }) => {
+    console.log(formData,"form dataedededed");
+    try {
+      const response = await axios.post(
+        `${apiUrl}/auth/login`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         }
-  
-        return response.data;
-      } catch (error: any) {
-        return rejectWithValue(error.response?.data || error.message);
+      );
+
+      if (response.status !== 200) {
+        return rejectWithValue(response.data);
       }
+
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
     }
-  );
-  
+  }
+);
+
 // Firma kullanıcı ekleme asenkron thunk
 export const firmaUserAdd = createAsyncThunk(
   'user/firmauserAdd',
   async (formData: FormData, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        'https://mobileapp.turkuvazprojeler.com/kullanici-kayit-ekle.php',
+        `${apiUrl}/auth/register`,
         formData,
         {
           headers: {
@@ -122,14 +127,13 @@ export const firmaUserAdd = createAsyncThunk(
 export const loginUser = createAsyncThunk(
   'user/logincontrol',
   async (formData: FormData, { rejectWithValue }) => {
- 
-
+    try {
       const response = await axios.post(
-        'https://mobileapp.turkuvazprojeler.com/login-control.php',
+        `${apiUrl}/auth/login`,
         formData,
         {
           headers: {
-            'Content-Type': 'multipart/form-data',
+            'Content-Type': 'application/json',
           },
         }
       );
@@ -139,10 +143,11 @@ export const loginUser = createAsyncThunk(
       }
 
       return response.data;
-    } 
-  
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
 );
-
 // User slice tanımı
 const userSlice = createSlice({
   name: 'user',
@@ -150,6 +155,8 @@ const userSlice = createSlice({
   reducers: {
     resetStatusType: (state) => {
       state.status_type = false;
+      SecureStore.deleteItemAsync('userToken');
+      navigate("Login")
     },
     setRememberMe: (state, action: PayloadAction<boolean>) => {
       state.rememberme = action.payload;
@@ -173,63 +180,80 @@ Alert.alert("Bilgi","Kayıt İşlemi Başarılı");
       },2000);
 
     }
-    }).addCase(firmaUserAdd.rejected, () => {
-      Alert.alert("Hata", "Sunucu taraflı sorun oluştu.");
+    }).addCase(firmaUserAdd.rejected, (state,action) => {
+      console.log(action.payload,"payload mesajı");
+      Alert.alert("Hata", action.payload.text);
+      
     });
 
-    builder.addCase(loginUser.fulfilled, (state, action) => {
-      console.log("full filed",action.payload);
-
+    builder.addCase(loginUser.fulfilled, async (state, action) => {
       if (action.payload.message) {
         Alert.alert("Bilgi", action.payload.message);
       }
-
-      // MainStack'teki navigate fonksiyonu zaten mevcut
-      state.status_type = action.payload.type;
+      
+      console.log(action.payload,"action payload login verileri");
+      const token = action.payload.token;
+      console.log(token,"token");
+      state.token   = token; 
+      state.status_type = action.payload;
       state.username = action.payload.username;
       state.email = action.payload.email;
       state.id = action.payload.id;
       state.firma_telefon = action.payload.telefon;
-    
+      SecureStore.setItemAsync('userToken', action.payload.token); // Token'ı SecureStore'da saklayın
+      SecureStore.setItemAsync("role",action.payload.status_type);
+    }).addCase(loginUser.rejected, (state, action) => {
+      Alert.alert("Hata", action.payload?.message || "Kullanıcı girişi başarısız.");
+      
     });
 
     builder.addCase(registerUser.fulfilled, (state, action) => {
-      state.loading = false;
+      state.loading = false; 
       console.log(action.payload,"payload mesajı");
       if(action.payload.message) 
         {
           Alert.alert("Bilgi",action.payload.message);
+          navigate("MusteriLogin")
         }
         else if(action.payload.text)
         {
         Alert.alert("Bilgi",action.payload.text);
-                
-                navigate("MusteriLogin")
+        navigate("MusteriLogin")
+
+             
         
             }
     });
+
+
 
     builder.addCase(registerUser.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload as string;
       Alert.alert("Hata", "Kullanıcı kaydı başarısız.");
+      navigate("MusteriLogin")
+
     });
 
-    builder.addCase(firmaUserControl.fulfilled, (state, action) => {
-      console.log(action.payload,"action payload mesajı");
+    builder.addCase(firmaUserControl.fulfilled, async (state, action) => {
+
+      
       if (action.payload.message) {
         Alert.alert("Bilgi", action.payload.message);
-        
         return;
       }
+      // JWT token'ıx SecureStore'da saklayın
+      const token = action.payload.token;
+      state.token   = token; 
+      state.status_type = action.payload.status_type
+      Alert.alert(action.payload.status_type,"role");
+      SecureStore.setItemAsync('userToken', action.payload.token); // Token'ı SecureStore'da saklayın
+      SecureStore.setItemAsync('role', action.payload.status_type); 
+      
+    }).addCase(firmaUserControl.rejected, (state, action) => {
 
-      state.status_type = action.payload.type;
-      state.email = action.payload.email;
-      state.username = action.payload.username;
-      state.firma_telefon = action.payload.telefon;
-      state.firma_vergidairesi = action.payload.firma_vergidairesi;
-      state.firma_verginumarasi = action.payload.firma_verginumarasi;
-      state.id = action.payload.id;
+      console.log(action.payload,"payload mesajı ded" );
+      Alert.alert("Hata", action.payload?.message || "Firma kullanıcı kontrolü başarısız.");
 
     });
   },
