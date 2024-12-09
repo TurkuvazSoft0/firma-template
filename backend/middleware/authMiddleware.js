@@ -20,5 +20,22 @@ const authenticateToken = (req, res, next) => {
     next(); // Bir sonraki middleware veya route handler'a geç
   });
 };
+const checkRole = (allowedRoles) => {
+  return (req, res, next) => {
+    const user = req.user; // authenticateToken middleware'i ile eklenmiştir
 
-module.exports = authenticateToken; 
+    if (!user) {
+      console.log("Kullanıcı bilgisi bulunamadı");
+      return res.status(401).json({ message: 'Token doğrulama yapılmamış.' });
+    }
+
+    if (!allowedRoles.includes(user.type)) {
+      console.log("Yetkisiz rol");
+      return res.status(403).json({ message: 'Bu işlem için yetkiniz yok.' });
+    }
+
+    console.log(`Rol onaylandı: ${user.type}`);
+    next(); // Bir sonraki middleware veya route handler'a geç
+  };
+};
+module.exports = {authenticateToken,checkRole}; 

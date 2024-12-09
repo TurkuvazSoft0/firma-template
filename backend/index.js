@@ -8,6 +8,7 @@ const authenticateToken = require('./middleware/authMiddleware');
 const teklifRoutes = require('./routes/teklifRoutes');
 const notificationRoute = require('./routes/notificationRoute');
 const roleControl = require('./routes/roleControl');
+const applicationRoute = require("./routes/applicationRoute");
 const db = require('./config/db');
 const app = express();
 const port = 3000;
@@ -17,14 +18,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // Şirket router'ını kullan
 app.use('/companies', companyRoutes);
+app.use("/application",applicationRoute);
 app.use('/auth', authRoutes);
 app.use('/teklif', teklifRoutes);
 app.use('/notification', notificationRoute);
 app.use('/roleControl', roleControl);
-// session  
-//  jwt token 
 
 // Sunucuyu başlat
-app.listen(port,"192.168.1.44", () => {
+app.listen(port,"192.168.1.62", () => {
   console.log(`Sunucu http://localhost:${port} adresinde çalışıyor`);
 });

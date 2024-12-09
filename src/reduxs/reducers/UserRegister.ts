@@ -38,7 +38,7 @@ export const initialUserRegisterState: IRegisterState = {
   firma_vergidairesi: false,
   firma_verginumarasi: false,
 };
-const apiUrl = "http://192.168.1.44:3000"
+const apiUrl = "http://192.168.1.62:3000"
 // Kullanıcı kayıt asenkron thunk
 export const registerUser = createAsyncThunk(
   'user/register',

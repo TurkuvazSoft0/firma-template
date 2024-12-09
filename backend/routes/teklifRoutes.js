@@ -2,7 +2,7 @@ const express = require("express");
 const db = require('../config/db.js');
 
 const router = express.Router();
-const authenticateToken = require('../middleware/authMiddleware');
+const {authenticateToken} = require('../middleware/authMiddleware');
 const nodemailer = require('nodemailer');
 const multer = require('multer');
 const upload = multer();

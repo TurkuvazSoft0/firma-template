@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Axios instance oluşturma
 const axiosInstance = axios.create({
-  baseURL: 'http://192.168.1.44:3000',
+  baseURL: 'http://192.168.1.62:3000',
 });
 
 // Interceptor ile token ve Content-Type ayarlama

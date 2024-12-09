@@ -9,10 +9,9 @@ import { AppIcon } from '../../AppIcon';
 const CompanyApplicationModal = ({sirketler, isModalVisible, setModalVisible}:{sirketler:any, isModalVisible:boolean, setModalVisible:any}) => {
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [query, setQuery] = useState('');
-  const [selectedOption, setSelectedOption] = useState(new IndexPath(0)); // Seçim kutusu için state
 
   const filteredCompanies = sirketler.filter(sirket => sirket.sirket_ad.toLowerCase().includes(query.toLowerCase()));
-
+  
   return (
     <Modal
       visible={isModalVisible}
@@ -35,34 +34,9 @@ const CompanyApplicationModal = ({sirketler, isModalVisible, setModalVisible}:{s
           <Text category="t4" style={styles.modalText}>
             Başvuru Yap
           </Text>
+<Input placeholder='İletmek İstediğiniz Mesaj' />
+       
 
-          <Select
-            selectedIndex={selectedOption}
-            onSelect={index => setSelectedOption(index)}
-            style={styles.select}
-          >
-            <SelectItem title='Zaten Şirketim Var' />
-            <SelectItem title='Şirketim Yok' />
-          </Select>
-
-          <View style={styles.autocompleteContainer}>
-            <Autocomplete
-              placeholder='Şirket Seçin'
-              value={query}
-              onChangeText={setQuery}
-              onSelect={index => {
-                const selected = filteredCompanies[index];
-                setSelectedCompany(selected);
-                setQuery(selected.sirket_ad);
-              }}
-              style={styles.autocomplete}
-              textStyle={styles.autocompleteText}
-            >
-              {filteredCompanies.map((sirket, index) => (
-                <AutocompleteItem key={index} title={sirket.sirket_ad} />
-              ))}
-            </Autocomplete>
-          </View>
 
           <Button status='primary'>
             Teklif Al

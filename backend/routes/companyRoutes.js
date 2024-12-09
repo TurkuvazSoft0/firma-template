@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require('../config/db.js');
-const authenticateToken = require('../middleware/authMiddleware');
+const {authenticateToken} = require("../middleware/authMiddleware.js")
 router.get("/company-get",authenticateToken, (req, res) => {
   const sql = "SELECT * FROM sirketler_new WHERE sirket_durum = 1 ORDER BY sirket_ad ASC";
 

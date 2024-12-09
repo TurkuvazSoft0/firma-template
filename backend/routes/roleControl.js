@@ -2,7 +2,7 @@ const express = require("express");
 const db = require('../config/db.js');
 
 const router = express.Router();
-const authenticateToken = require('../middleware/authMiddleware');
+const {authenticateToken}  = require('../middleware/authMiddleware');
 
 // Yeni rota ekleme
 router.get('/', authenticateToken , (req, res) => {
