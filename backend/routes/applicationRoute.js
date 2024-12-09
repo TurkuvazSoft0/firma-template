@@ -1,30 +1,49 @@
 const express = require('express');
 const db = require('../config/db.js');
 const router = express.Router();
+const multer = require("multer")
 const { authenticateToken,checkRole }  =  require('../middleware/authMiddleware.js');
 // Başvuru eklemek için POST isteği
-router.post('/basvuru-ekle',authenticateToken,checkRole(["firma"]) ,async (req, res) => {
-    const {id} = req.user; // İstemciden gelen veriler
-
-    // Gerekli alanların kontrolü
-    if (!firma_id || !durum) {
-        return res.status(400).json({ status: 'error', message: 'Firma ID ve durum alanları gereklidir.' });
+const upload = multer();
+router.get('/firma-basvuru-ekle',authenticateToken,upload.none(), checkRole(["firma"]), (req, res) => {
+    const user = req.user; // Token'dan gelen bilgiler
+    console.log("Deneme");
+    const basvuru_firma_id = user.id; // Örneğin, firma ID'si token'dan gelir
+    const { basvuru_mesaj } = req.query;
+    console.log(basvuru_mesaj);
+    if (!basvuru_mesaj) {
+    console.log("Başvuru Mesajı Gereklidir");
+        return res.status(400).json({ message: "Başvuru mesajı gerekli" });
     }
-
-    try {
-        // Başvuru ekleme işlemi
-        const [result] = await db.promise().query('INSERT INTO firma_panel_basvurulari (basvuru_firma_id, basvuru_durum) VALUES (?, 0)', [id]);
-
-        // Başvuru başarıyla eklendiyse
-        if (result.affectedRows > 0) {
-            return res.status(201).json({ status: 'success', message: 'Başvuru başarıyla eklendi.', basvuru_id: result.insertId });
-        } else {
-            return res.status(500).json({ status: 'error', message: 'Başvuru eklenirken bir hata oluştu.' });
+    // Aynı ID ile başvuru kontrolü
+    const checkQuery = "SELECT * FROM firma_panel_basvurulari WHERE basvuru_firma_id = ?";
+    db.query(checkQuery, [basvuru_firma_id], (err, results) => {
+        if (err) {
+            console.error("Veritabanı hatası:", err);
+            return res.status(500).json({ message: "Sunucu hatası" });
         }
-    } catch (error) {
-        console.error('Hata:', error);
-        return res.status(500).json({ status: 'error', message: 'Sunucu hatası.' });
-    }
+
+        if (results.length > 0) {
+            // Eğer kayıt varsa işlem yapılmaz
+            return res.status(409).json({ message: "Bu firma için zaten bir başvuru mevcut" });
+        }
+
+        // Veritabanına başvuru kaydı ekleme
+        const insertQuery = `
+            INSERT INTO firma_panel_basvurulari (basvuru_firma_id, basvuru_durum, basvuru_mesaj)
+            VALUES (?, 0, ?)
+        `;
+        db.query(insertQuery, [basvuru_firma_id, basvuru_mesaj], (err, result) => {
+            if (err) {
+                console.error("Veritabanı hatası:", err);
+                return res.status(500).json({ message: "Sunucu hatası" });
+            }
+
+            console.log("Başvuru başarıyla eklendi:", result);
+            res.status(200).json({ message: "Başvuru başarıyla eklendi"});
+        });
+    });
 });
+
 
 module.exports  = router;

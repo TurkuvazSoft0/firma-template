@@ -49,23 +49,6 @@ export const AddBulkMail = createAsyncThunk(
   }
 );
 
-export const ApplicationBulk = createAsyncThunk(
-  'mails/ApplicationBulk',
-  async (data:string, { rejectWithValue }) => {
-  
-
-    try {
-      const response = await axiosInstance.get(
-        `/application/firma-basvuru-ekle?basvuru_mesaj=${data}`,
-     
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Hata:', error.response ? error.response.data : error.message);
-      return rejectWithValue(error.response ? error.response.data : error.message);
-    }
-  }
-);
 
 export const GetFullMail = createAsyncThunk(
   'mails/GetFullMail',

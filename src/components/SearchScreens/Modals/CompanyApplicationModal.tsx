@@ -1,14 +1,20 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, View, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import { Input, Autocomplete, AutocompleteItem, Button, Text, Select, SelectItem } from '@ui-kitten/components';
 import tw from "twrnc";
 import EvaIcons from '../../../types/eva-icon-enum';
 import { StyleSheet } from 'react-native';
 import { AppIcon } from '../../AppIcon';
-
+import { useDispatch } from 'react-redux';
+import { AddBulkMail, ApplicationBulk } from '../../../reduxs/reducers/teklifSlice';
+import { AppDispatch } from '../../../reduxs/store';
 const CompanyApplicationModal = ({sirketler, isModalVisible, setModalVisible}:{sirketler:any, isModalVisible:boolean, setModalVisible:any}) => {
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [query, setQuery] = useState('');
+  const [message,setMessage] = React.useState<string | false>();
+const dispatch = useDispatch<AppDispatch>();
+const formData = new FormData();
+
 
   const filteredCompanies = sirketler.filter(sirket => sirket.sirket_ad.toLowerCase().includes(query.toLowerCase()));
   
@@ -34,12 +40,12 @@ const CompanyApplicationModal = ({sirketler, isModalVisible, setModalVisible}:{s
           <Text category="t4" style={styles.modalText}>
             Başvuru Yap
           </Text>
-<Input placeholder='İletmek İstediğiniz Mesaj' />
+<Input placeholder='İletmek İstediğiniz Mesaj' onChangeText={(value) => setMessage(value)} textStyle={{height:120}} />
        
 
 
-          <Button status='primary'>
-            Teklif Al
+          <Button onPress={() => dispatch(ApplicationBulk(message))} status='primary'>
+            Başvuru  Yap
           </Button>
         </View>
       </KeyboardAvoidingView>
