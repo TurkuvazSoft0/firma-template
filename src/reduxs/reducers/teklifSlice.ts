@@ -141,6 +141,13 @@ export const mailSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+    .addCase(ApplicationBulk.fulfilled,(state : MailState,action:PayloadAction<any>) => 
+      { 
+        Alert.alert(action.payload.message);
+      }).addCase(ApplicationBulk.rejected,(state:MailState,action:PayloadAction<any>) => 
+        { 
+          Alert.alert(action.payload.message);
+        })
       .addCase(AddBulkMail.pending, (state: MailState) => {
         state.status = 'loading';
       })

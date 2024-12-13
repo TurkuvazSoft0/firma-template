@@ -11,29 +11,25 @@ import EvaIcons from 'types/eva-icon-enum';
 import {MainStackParamList} from 'types/navigation-types';
 // ----------------------------- Components && Elements -----------------------
 import {Container, Content, NavigationAction} from 'components';
-import Reviews from './Reviews';
 import Information from './Information';
-import WorkingTime from './WorkingTime';
 
 const DetailsDoctorScreen = React.memo(() => {
   const styles = useStyleSheet(themedStyles);
   const {height, width, top, bottom} = useLayout();
   const doctor =
     useRoute<RouteProp<MainStackParamList, 'DetailsDoctor'>>().params.doctor;
-
+    
   return (
     <Container style={styles.container} useSafeArea={false}>
       <TopNavigation
         style={[styles.navigation, {paddingTop: top + 8}]}
         appearance="control"
         accessoryLeft={() => <NavigationAction marginRight={12} />}
-        title={doctor.name}
-        accessoryRight={() => <NavigationAction icon={EvaIcons.HeartOutline} />}
+        title={doctor.sirket_ad}
       />
       <Content contentContainerStyle={styles.content} level="3">
         <Information doctor={doctor} />
-        <WorkingTime availableDays={doctor.availableDays} />
-        <Reviews reviews={doctor.reviews} />
+     
       </Content>
     </Container>
   );
@@ -53,5 +49,7 @@ const themedStyles = StyleService.create({
   content: {
     paddingTop: 24,
     paddingBottom: 120,
+    display:"flex",
+    flexDirection:"column"
   },
 });

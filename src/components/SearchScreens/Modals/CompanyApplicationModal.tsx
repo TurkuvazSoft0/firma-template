@@ -40,7 +40,7 @@ const formData = new FormData();
           <Text category="t4" style={styles.modalText}>
             Başvuru Yap
           </Text>
-<Input placeholder='İletmek İstediğiniz Mesaj' onChangeText={(value) => setMessage(value)} textStyle={{height:120}} />
+<Input  placeholder='İletmek İstediğiniz Mesaj' onChangeText={(value) => setMessage(value)} textStyle={{height:120}} />
        
 
 

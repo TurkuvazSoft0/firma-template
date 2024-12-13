@@ -117,6 +117,7 @@ function TabNavigator() {
         role == "firma" &&
       <Tab.Screen name="Şirket Ekle" component={CompanyScreen} />
       }
+      
       <Tab.Screen name="Profil" component={EditProfile} />
       
     </Tab.Navigator>

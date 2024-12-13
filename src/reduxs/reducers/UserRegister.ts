@@ -38,8 +38,8 @@ export const initialUserRegisterState: IRegisterState = {
   firma_vergidairesi: false,
   firma_verginumarasi: false,
 };
-const apiUrl = "http://192.168.1.62:3000"
-// Kullanıcı kayıt asenkron thunk
+const apiUrl = "http://192.168.1.92:3000"
+// Kullanıcı kayıt asenkron thunk 
 export const registerUser = createAsyncThunk(
   'user/register',
   async (formData: Record<string, string>, { rejectWithValue }) => {
@@ -218,9 +218,7 @@ Alert.alert("Bilgi","Kayıt İşlemi Başarılı");
         else if(action.payload.text)
         {
         Alert.alert("Bilgi",action.payload.text);
-        navigate("MusteriLogin")
-
-             
+        navigate("MusteriLogin");
         
             }
     });

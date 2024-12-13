@@ -81,6 +81,7 @@ const SearchScreen = React.memo(() => {
     },[mailList]);
   const { navigate } = useNavigation<NavigationProp<AuthStackParamList>>();
   
+  const MainStackNavigator = useNavigation<NavigationProp<MainStackParamList>>();
   const GoogleIcon = (props) => (
     <Icon name='google' pack='eva' {...props} />
   );
@@ -406,10 +407,13 @@ const onOpen =  () =>
   {
     setModalVisible(true);
   }
+  
   const _onDetails = (doctor:IDoctorProps) => {
   openModal2();
   setSearchValue("");
-  };
+  Alert.alert("deneme")
+
+};
   const [selectedIndex, setSelectedIndex] = React.useState<IndexPath | IndexPath[]>(new IndexPath(0));
 
   const selectItem = ["Uygulama Üzerinden Mail Gönder","Mail Üzerinden Gönder "]
@@ -450,15 +454,20 @@ const onOpen =  () =>
           title="Firmalar APP"
           accessoryRight={() => (
             <>  
-            <NavigationAction
-              icon={EvaIcons.LogOut}
-              onPress={handleLogout}
-            />
-            <Button size='tiny'  onPress={() => setCompanyApplicationModalVisible(true)} status='primary'>
+          
+            <Button size='tiny'  onPress={() =>
+            {
+               setCompanyApplicationModalVisible(true)
+           
+            }
+               } status='primary'>
               Başvuru Yap
               
           </Button>
-            
+          <NavigationAction
+              icon={EvaIcons.LogOut}
+              onPress={handleLogout}
+            />
             
 
 
@@ -499,6 +508,7 @@ const onOpen =  () =>
               <CustomLayout mh={24} onPress={() => {
                 _onDetails(item);
                 setSirketId(index);   
+                Alert.alert("denemeded")
               }}>
                
                 <DoctorItem 

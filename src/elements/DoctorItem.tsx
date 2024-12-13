@@ -13,6 +13,8 @@ import { CustomLayout, Text } from 'components';
 import GeneralModal from 'components/SearchScreens/Modals/GeneralModal';
 import { useLayout } from 'hooks';
 import tw from "twrnc"
+import { MainStackParamList } from '../types/navigation-types';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 const DoctorItem = React.memo(({mailList, nameList,data,  searchValue, setMailList,setNameList,mailList2,setMailList2,mail }: {mail:string, mailList:any,setNameList:any,data: any, setMailList: any, onOpen: any, searchValue: any,nameList:any,mailList2:any,setMailList2:any}) => {
   const theme = useTheme();
   const { width } = useLayout();
@@ -20,7 +22,7 @@ const DoctorItem = React.memo(({mailList, nameList,data,  searchValue, setMailLi
   const [isModalVisible, setModalVisible] = React.useState(false);
   const [selectedMail, setSelectedMail] = useState<any | null | object>(null);
   const [selectedName, setSelectedName] = useState<any | null | object>(null);
-
+  const MainStackNavigator = useNavigation<NavigationProp<MainStackParamList>>();
   const handlePress = () => {
     console.log(selectedMail, "selected mail");
 if(!searchValue)
@@ -92,6 +94,7 @@ console.log(mailList2,"mail listesi2");
   return (
     <CustomLayout
       level="1"
+      
       onPress={modalPress}
       style={[
         styles.container,
@@ -121,7 +124,7 @@ console.log(mailList2,"mail listesi2");
         pinterest={data.sirket_veriler?.pinterest}
       />
 
-      <CustomLayout style={{ flex: 1 }} horizontal justify="space-between">
+      <CustomLayout   style={{ flex: 1 }} horizontal justify="space-between">
       <Text numberOfLines={1} style={{ maxWidth: 200 * (width / 335) }}>
           {truncateText(data.sirket_ad, 25)}
         </Text>
@@ -149,6 +152,7 @@ console.log(mailList2,"mail listesi2");
     justifyContent: 'center',
     alignItems: 'center',
   }}
+  onPress={() => MainStackNavigator.navigate("DetailsDoctor",{doctor:data})}  
 >
   <Icon
     name='eye'

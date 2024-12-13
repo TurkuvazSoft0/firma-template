@@ -43,7 +43,6 @@ export const AddBulkMail = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
-      console.error('Hata:', error.response ? error.response.data : error.message);
       return rejectWithValue(error.response ? error.response.data : error.message);
     }
   }

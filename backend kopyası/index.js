@@ -25,6 +25,6 @@ app.use('/notification', notificationRoute);
 app.use('/roleControl', roleControl);
 
 // Sunucuyu başlat
-app.listen(port,"192.168.1.92", () => {
+app.listen(port, () => {
   console.log(`Sunucu http://localhost:${port} adresinde çalışıyor`);
 });

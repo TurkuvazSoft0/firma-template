@@ -7,6 +7,7 @@ import {
   Avatar,
   Divider,
 } from '@ui-kitten/components';
+import tw from "twrnc"
 // ----------------------------- Hooks ---------------------------------------
 import {useLayout} from 'hooks';
 // ----------------------------- Components && Elements -----------------------
@@ -17,18 +18,13 @@ import {IDoctorProps} from 'types/element-types';
 import EvaIcons from 'types/eva-icon-enum';
 // ----------------------------- Style -----------------------------------
 import {globalStyle} from 'styles/globalStyle';
+import { Image } from 'react-native';
 
 const Information = React.memo(({doctor}: {doctor: IDoctorProps}) => {
   const theme = useTheme();
   const styles = useStyleSheet(themedStyles);
   const {width} = useLayout();
 
-  const address =
-    doctor.address.street +
-    ', ' +
-    doctor.address.city +
-    ', ' +
-    doctor.address.country;
 
   const CButton = ({
     icon,
@@ -51,49 +47,46 @@ const Information = React.memo(({doctor}: {doctor: IDoctorProps}) => {
           }}>
           <AppIcon name={icon} fill={theme['text-primary-color']} />
         </CustomLayout>
-        <Text category="body" status="primary">
-          {title}
-        </Text>
-        <Text category="c1" capitalize>
-          {desc}
-        </Text>
+     
+      
       </CustomLayout>
     );
   };
   return (
     <CustomLayout>
-      <CustomLayout
-        level="1"
-        style={styles.information}
-        horizontal
-        gap={24}
-        itemsCenter
-        mh={24}>
-        <Avatar source={doctor.avatar} size="large" />
-        <CustomLayout gap={4}>
-          <Text category="t5">{doctor.name}</Text>
-          <Divider />
-          <Text category="subhead" opacity={0.7}>
-            {doctor.specialty}
-          </Text>
-          <Text category="subhead" opacity={0.7}>
-            {doctor.hospital}
-          </Text>
-          <Text category="subhead" opacity={0.7}>
-            {address}
-          </Text>
-        </CustomLayout>
-      </CustomLayout>
+  <CustomLayout
+  level="1"
+  style={tw`py-5`}
+  vertical
+  gap={16}
+  itemsCenter
+  mh={24}
+
+>
+  <Image source={{uri:"https://via.placeholder.com/640x360"}} width={150} height={150} style={tw`rounded-full `}/>
+  <CustomLayout gap={8} itemsCenter>
+    <Text category="t5">{doctor.sirket_ad}</Text>
+    <Divider />
+    <Text category="subhead" opacity={0.7}>
+      {doctor.sirket_ad}
+    </Text>
+    <Text category="subhead" opacity={0.7}>
+      {doctor.sirket_ad}
+    </Text>
+  </CustomLayout>
+</CustomLayout>
+
       <CustomLayout horizontal justify="space-between" margin={24}>
         <CButton title="500+" desc={'patient'} icon={EvaIcons.People} />
         <CButton title="10+" desc={'year exp'} icon={EvaIcons.Book} />
         <CButton title="4.8" desc={'rating'} icon={EvaIcons.Star} />
         <CButton title="1,901" desc={'reviews'} icon={EvaIcons.MessageCircle} />
       </CustomLayout>
-      <CustomLayout mh={24} gap={12}>
+   { /*  <CustomLayout mh={24} gap={12}>
         <Text category="t5">About me</Text>
-        <ReadMoreText text={doctor.about_me} maxLength={150} />
+        <ReadMoreText text={"deed"} maxLength={150} />
       </CustomLayout>
+      */}
     </CustomLayout>
   );
 });
@@ -104,7 +97,9 @@ const themedStyles = StyleService.create({
   information: {
     borderRadius: 16,
     padding: 16,
-    ...globalStyle.shadow,
+   
     zIndex: 10,
+    display:"flex",
+    flexDirection:"column"
   },
 });

@@ -2,7 +2,8 @@ import React from 'react';
 import { View, Text, Modal, StyleSheet, TouchableOpacity, Linking, Alert, ScrollView, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-
+import { Button } from '@ui-kitten/components';
+import tw from "twrnc"
 interface GeneralModalProps {
   referanslar?: string[];
   generalModal: boolean;
@@ -194,6 +195,20 @@ const GeneralModal: React.FC<GeneralModalProps> = ({
               </View>
             </View>
 
+
+
+            <View style={{ display: "flex", flexDirection: "row", gap: 20, marginVertical: 10, alignItems: "center" }}>
+              <Ionicons name="person" size={24} color="#66D3FA" />
+              <View style={{ display: "flex", flexDirection: "row", gap: 20 }}>
+              <TouchableOpacity
+                  style={styles.actionButton}
+                 
+                >
+                  <Text style={tw`bg-[#66D3FA] text-white px-3`}>Takip Et</Text>
+                </TouchableOpacity>              </View>
+            </View>
+
+
             {location && location.map((loc, index) => (
               <View key={index}>
                 <View style={styles.itemContainer}>
@@ -247,6 +262,8 @@ const GeneralModal: React.FC<GeneralModalProps> = ({
                 </TouchableOpacity>
               )}
             </View>
+
+
           </ScrollView>
         </View>
       </View>
