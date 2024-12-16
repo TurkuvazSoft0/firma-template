@@ -143,7 +143,6 @@ export const mailSlice = createSlice({
     builder
     .addCase(ApplicationBulk.fulfilled,(state : MailState,action:PayloadAction<any>) => 
       { 
-        Alert.alert(action.payload.message);
       }).addCase(ApplicationBulk.rejected,(state:MailState,action:PayloadAction<any>) => 
         { 
           Alert.alert(action.payload.message);

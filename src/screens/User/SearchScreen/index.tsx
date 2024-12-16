@@ -155,7 +155,6 @@ const SearchScreen = React.memo(() => {
   // Burası Token Değiştiğinde çalışacak
   useEffect(() => {
     if (token) {
-      Alert.alert("Token", token.toString());
       dispatch(fetchSirketler());
     }
   }, [token, dispatch]); // Token değiştiğinde veya dispatch değiştiğinde çalışır
@@ -411,7 +410,6 @@ const onOpen =  () =>
   const _onDetails = (doctor:IDoctorProps) => {
   openModal2();
   setSearchValue("");
-  Alert.alert("deneme")
 
 };
   const [selectedIndex, setSelectedIndex] = React.useState<IndexPath | IndexPath[]>(new IndexPath(0));
@@ -508,7 +506,6 @@ const onOpen =  () =>
               <CustomLayout mh={24} onPress={() => {
                 _onDetails(item);
                 setSirketId(index);   
-                Alert.alert("denemeded")
               }}>
                
                 <DoctorItem 

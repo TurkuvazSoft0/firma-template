@@ -38,7 +38,7 @@ export const initialUserRegisterState: IRegisterState = {
   firma_vergidairesi: false,
   firma_verginumarasi: false,
 };
-const apiUrl = "http://192.168.1.92:3000"
+const apiUrl = "https://firmaip.turkuvazprojeler.com/api"
 // Kullanıcı kayıt asenkron thunk 
 export const registerUser = createAsyncThunk(
   'user/register',
@@ -244,7 +244,6 @@ Alert.alert("Bilgi","Kayıt İşlemi Başarılı");
       const token = action.payload.token;
       state.token   = token; 
       state.status_type = action.payload.status_type
-      Alert.alert(action.payload.status_type,"role");
       SecureStore.setItemAsync('userToken', action.payload.token); // Token'ı SecureStore'da saklayın
       SecureStore.setItemAsync('role', action.payload.status_type); 
       

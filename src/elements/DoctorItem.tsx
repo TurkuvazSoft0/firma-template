@@ -143,23 +143,7 @@ console.log(mailList2,"mail listesi2");
         >
           <Text style={{ color: theme['color-basic-100'], fontWeight: 'bold' }}>✔</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-  style={{
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "green",
-    justifyContent: 'center',
-    alignItems: 'center',
-  }}
-  onPress={() => MainStackNavigator.navigate("DetailsDoctor",{doctor:data})}  
->
-  <Icon
-    name='eye'
-    fill={theme['color-basic-100']}
-    style={{ width: 24, height: 24 }}
-  />
-</TouchableOpacity>
+    
 </View>
       </CustomLayout>
     </CustomLayout>
